@@ -34,7 +34,7 @@ public class GeneBankSearch {
 			
 			//@TODO Do something
 			/*
-			btree = new BTree();
+			btree = new BTree(btreeFile);
 			*/
 			
 			dis.close();
