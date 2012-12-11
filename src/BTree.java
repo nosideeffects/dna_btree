@@ -56,7 +56,7 @@ public class BTree<T extends Comparable<T>> {
 		}
 	}
 	
-	private class BTreeNode<T> {
+	private class BTreeNode<T extends Comparable<T>> {
 		private boolean leaf;
 		private long key;
 		private int n;
@@ -122,14 +122,6 @@ public class BTree<T extends Comparable<T>> {
 			z.save();
 			this.save();
 		}
-		
-		/**
-		 * Saves node to disk.
-		 */
-		private void save() {
-			// TODO Auto-generated method stub
-			
-		}
 
 		public void setKey(int index, TreeObject<T> obj){
 			keys[index] = obj;
@@ -150,9 +142,47 @@ public class BTree<T extends Comparable<T>> {
 		 * @param key key to insert
 		 */
 		public void insert(T key){
-			
+			int i = this.n;
+			if (this.isLeaf()) {
+				while (i >= 0 && key.compareTo(this.getKey(i).key()) < 0 ) {
+					this.setKey(i+1, this.removeKey(i));
+					i--;
+				}
+				this.setKey(i+1,new TreeObject<T>(key));
+				this.n = this.n + 1;
+				this.save();
+			} else {
+				while(i >= 1 && key.compareTo(this.getKey(i).key()) < 0 ) {
+					i--;
+				}
+				i--;
+				this.getChild(i).load();
+				if (this.getChild(i).isFull()) {
+					this.splitChild(i);
+					if (key.compareTo(this.getKey(i).key()) > 0) {
+						i++;
+					}
+				}
+				this.getChild(i).insert(key);
+			}
 		}
 		
+		/**
+		 * Loads node from disk.
+		 */
+		private void load() {
+			// TODO Auto-generated method stub
+			
+		}
+
+		/**
+		 * Saves node to disk.
+		 */
+		private void save() {
+			// TODO Auto-generated method stub
+			
+		}
+
 		/**
 		 * Returns number of contains objects
 		 * @return # of objects
@@ -182,7 +212,7 @@ public class BTree<T extends Comparable<T>> {
 		}
 	}
 	
-	private class TreeObject<T>{
+	private class TreeObject<T extends Comparable<T>>{
 		private int frequency;
 		private T key;
 		
