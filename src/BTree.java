@@ -1,9 +1,11 @@
 import java.io.*;
+import java.util.ArrayList;
 
-public class BTree {
+public class BTree<T> {
 	
 	private int degree;
 	private int sequenceLength;
+	private BTreeNode<T> root;
 
 	public BTree(int degree, int sequenceLength) {
 		
@@ -47,15 +49,35 @@ public class BTree {
 		}
 	}
 	
-	private class BTreeNode {
+	private class BTreeNode<T> {
 		private boolean leaf;
-		private int n;
 		private long key;
+		private ArrayList<T> keys;
+		private ArrayList<BTreeNode<T>> children; 
 		
 		public BTreeNode(){
 			this.leaf = true;
-			this.n = 0;
+			
+			this.keys = new ArrayList<T>();
+			this.children = new ArrayList<BTreeNode<T>>();
+			
 			this.key = 0;
+		}
+		
+		/**
+		 * Returns number of contains objects
+		 * @return # of objects
+		 */
+		public int n(){
+			return keys.size();
+		}
+		
+		/**
+		 * Returns true if node is full, false otherwise.
+		 * @return 
+		 */
+		public boolean isFull(){
+			return n() == (2 * degree) - 1;
 		}
 	}
 }
