@@ -1,5 +1,7 @@
-.project
 bin\
-bin\*
+
+*.class
+
+.project
 .DS_Store
 .classpath
