@@ -48,6 +48,7 @@ public class BTree<T extends Comparable<T>> {
 			this.root = s;
 			
 			s.setChild(0, r);
+			s.splitChild(0);
 			s.insert(key);
 		} else {
 			r.insert(key);
@@ -79,21 +80,63 @@ public class BTree<T extends Comparable<T>> {
 			return children.get(index);
 		}
 		
+		public BTreeNode<T> removeChild(int index){
+			BTreeNode<T> c = children.get(index);
+			children.set(index, null);
+			return c;
+		}
+		
 		public void splitChild(int index){
 			BTreeNode<T> z = new BTreeNode<T>();
 			BTreeNode<T> y = getChild(index);
 			
 			z.isLeaf(y.isLeaf());
 			
-			// TODO: split childrne into each node
+			for (int j = 0; j < degree - 1; j++) {
+				z.setKey(j, y.removeKey(j+degree));
+			}
+			
+			if (!y.isLeaf()) {
+				for (int j = 0; j < degree; j++) {
+					z.setChild(j, y.removeChild(j+degree));
+				}
+			}
+			
+			for (int j = this.n() + 1; j > index + 1; j--) {
+				this.setChild(j+1, this.removeChild(j));
+			}
+			this.setChild(index+1, z);
+			
+			for (int j = this.n(); j > index; j--){
+				this.setKey(j+1,this.removeKey(j));
+			}
+			this.setKey(index, y.removeKey(degree));
+			
+			y.save();
+			z.save();
+			this.save();
 		}
 		
+		/**
+		 * Saves node to disk.
+		 */
+		private void save() {
+			// TODO Auto-generated method stub
+			
+		}
+
 		public void setKey(int index, TreeObject<T> obj){
 			keys.set(index, obj);
 		}
 		
 		public TreeObject<T> getKey(int index){
 			return keys.get(index);
+		}
+		
+		public TreeObject<T> removeKey(int index){
+			TreeObject<T> k = keys.get(index);
+			keys.set(index, null);
+			return k;
 		}
 		
 		/**
