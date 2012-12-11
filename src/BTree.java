@@ -1,7 +1,7 @@
 import java.io.*;
 import java.util.ArrayList;
 
-public class BTree<T> {
+public class BTree<T extends Comparable<T>> {
 	
 	private int degree;
 	private int sequenceLength;
@@ -49,16 +49,20 @@ public class BTree<T> {
 		}
 	}
 	
+	public void insert(T object){
+		
+	}
+	
 	private class BTreeNode<T> {
 		private boolean leaf;
 		private long key;
-		private ArrayList<T> keys;
+		private ArrayList<BTreeNodeObject<T>> keys;
 		private ArrayList<BTreeNode<T>> children; 
 		
 		public BTreeNode(){
 			this.leaf = true;
 			
-			this.keys = new ArrayList<T>();
+			this.keys = new ArrayList<BTreeNodeObject<T>>();
 			this.children = new ArrayList<BTreeNode<T>>();
 			
 			this.key = 0;
@@ -78,6 +82,23 @@ public class BTree<T> {
 		 */
 		public boolean isFull(){
 			return n() == (2 * degree) - 1;
+		}
+	}
+	
+	private class BTreeNodeObject<T>{
+		private int frequency;
+		private T key;
+		
+		public BTreeNodeObject(T key){
+			this.key = key;
+		}
+		
+		public T key(){
+			return this.key;
+		}
+		
+		public int frequency(){
+			return this.frequency;
 		}
 	}
 }
