@@ -4,25 +4,17 @@ import java.util.ArrayList;
 public class BTree<T extends Comparable<T>> {
 	
 	private int degree;
-	private int sequenceLength;
 	private BTreeNode<T> root;
 
-	public BTree(int degree, int sequenceLength) {
+	public BTree(int degree) {
 		
 		this.degree = degree;
-		this.sequenceLength = sequenceLength;
 		
 		if (degree < 1) {
 			
 			System.err.println("Invalid degree. Must be a positive integer.");
 			System.exit(3);
-		}
-		
-		if (sequenceLength < 1 || sequenceLength > 31) {
-			
-			System.err.println("Invalid sequence length. Muse be an integer between 1 and 31 (inclusive).");
-			System.exit(4);
-		}
+		}	
 		
 		this.root = new BTreeNode<T>();
 	}
@@ -56,6 +48,7 @@ public class BTree<T extends Comparable<T>> {
 			this.root = s;
 			
 			s.setChild(0, r);
+			s.insert(key);
 		} else {
 			r.insert(key);
 		}
@@ -150,6 +143,10 @@ public class BTree<T extends Comparable<T>> {
 		
 		public int frequency(){
 			return this.frequency;
+		}
+		
+		public void incrementFrequency(){
+			this.frequency++;
 		}
 	}
 }

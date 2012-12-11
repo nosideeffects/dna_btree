@@ -24,9 +24,14 @@ public class GeneBankCreateBTree {
 			gbkFile = args[1];
 			sequenceLength = Integer.parseInt(args[2]);
 			
+			if (sequenceLength < 1 || sequenceLength > 31) {
+				
+				System.err.println("Invalid sequence length. Muse be an integer between 1 and 31 (inclusive).");
+				System.exit(4);
+			}
+			
 			// If exists, set debug level
 			if (args.length > 3) {
-				
 				debugLevel = Integer.parseInt(args[3]);
 			}
 		} catch (IndexOutOfBoundsException e) {
@@ -39,7 +44,7 @@ public class GeneBankCreateBTree {
 		try {
 			
 			// Create empty BTree
-			BTree btree = new BTree(degree, sequenceLength);
+			BTree<Sequence> btree = new BTree<Sequence>(degree);
 			
 			// Read gbkFile
 			FileInputStream fis = new FileInputStream(gbkFile);

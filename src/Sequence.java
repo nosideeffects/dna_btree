@@ -5,7 +5,7 @@
  * @author Jacob Biggs
  *
  */
-public class Sequence {
+public class Sequence implements Comparable<Sequence> {
 	private Long seq;
 	
 	/**
@@ -14,14 +14,28 @@ public class Sequence {
 	 * @param seq
 	 */
 	public Sequence(Long seq){
-		
+		this.seq = seq;
 	}
 	
 
-	public Sequence(String str){
-		if (str.length() == 0 || str.length() > 31){
+	public Sequence(String str, int sequenceLength){
+		if (sequenceLength > 31 || sequenceLength < 1){
 			throw new IllegalArgumentException("Sequence length was 0 or >31:\n" + str);
 		}
 	
+	}
+
+	public Long val(){
+		return this.seq;
+	}
+
+	@Override
+	public int compareTo(Sequence that) {
+		if (this.val() > that.val()) {
+			return 1;
+		} else if(this.val() == that.val()) {
+			return 0;
+		}
+		return -1;
 	}
 }
