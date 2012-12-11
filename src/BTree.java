@@ -64,13 +64,13 @@ public class BTree<T extends Comparable<T>> {
 	private class BTreeNode<T> {
 		private boolean leaf;
 		private long key;
-		private ArrayList<BTreeNodeObject<T>> keys;
+		private ArrayList<TreeObject<T>> keys;
 		private ArrayList<BTreeNode<T>> children; 
 		
 		public BTreeNode(){
 			this.leaf = true;
 			
-			this.keys = new ArrayList<BTreeNodeObject<T>>();
+			this.keys = new ArrayList<TreeObject<T>>();
 			this.keys.ensureCapacity(degree * 2 - 1);
 			this.children = new ArrayList<BTreeNode<T>>();
 			this.children.ensureCapacity(degree*2);
@@ -95,11 +95,11 @@ public class BTree<T extends Comparable<T>> {
 			// TODO: split childrne into each node
 		}
 		
-		public void setKey(int index, BTreeNodeObject<T> obj){
+		public void setKey(int index, TreeObject<T> obj){
 			keys.set(index, obj);
 		}
 		
-		public BTreeNodeObject<T> getKey(int index){
+		public TreeObject<T> getKey(int index){
 			return keys.get(index);
 		}
 		
@@ -136,11 +136,11 @@ public class BTree<T extends Comparable<T>> {
 		}
 	}
 	
-	private class BTreeNodeObject<T>{
+	private class TreeObject<T>{
 		private int frequency;
 		private T key;
 		
-		public BTreeNodeObject(T key){
+		public TreeObject(T key){
 			this.key = key;
 		}
 		
