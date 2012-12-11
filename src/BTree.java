@@ -2,7 +2,8 @@ import java.io.*;
 
 public class BTree {
 	
-	private int degree, sequenceLength;
+	private int degree;
+	private int sequenceLength;
 
 	public BTree(int degree, int sequenceLength) {
 		
@@ -43,6 +44,18 @@ public class BTree {
 		} catch (IOException e) {
 			
 			
+		}
+	}
+	
+	private class BTreeNode {
+		private boolean leaf;
+		private int n;
+		private long key;
+		
+		public BTreeNode(){
+			this.leaf = true;
+			this.n = 0;
+			this.key = 0;
 		}
 	}
 }
