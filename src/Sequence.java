@@ -35,7 +35,7 @@ public class Sequence implements Comparable<Sequence> {
 		
 		for (int i = 0, p = str.length() - 1; p >= 0; i++, p--) {
 			
-			System.out.println("i:" + i + " p:" + p);
+			//System.out.println("i:" + i + " p:" + p);
 			c = str.charAt(p);
 			switch (c) {
 			
@@ -66,11 +66,25 @@ public class Sequence implements Comparable<Sequence> {
 	}
 
 	public static Sequence[] parseSequences(String str, int sequenceLength){
-		// TODO: Parse any length string into all possible subsequences
 		// 'str' must be void of any whitespace and numbers
 		ArrayList<Sequence> al = new ArrayList<Sequence>();
+		String s = "";
 		
-		return (Sequence[]) al.toArray();
+		for (int i = 0; i < str.length() - sequenceLength + 1; i++) {
+			
+			s = str.substring(i, i + sequenceLength);
+			
+			if (s.contains("n")) {
+				
+				i += s.indexOf('n');
+				continue;
+			}
+			//System.out.println(s);
+			
+			al.add(new Sequence(s, sequenceLength));
+		}
+		
+		return al.toArray(new Sequence[al.size()]);
 	}
 	
 	public Long val(){

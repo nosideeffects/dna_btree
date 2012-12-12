@@ -6,13 +6,24 @@ public class SequenceTest {
 	 */
 	public static void main(String[] args) {
 		
-		String str = "t    g c";
-		Sequence s = new Sequence(str, 8);
+		String str = "acn";
+		//Sequence s = new Sequence(str, 3);
 		
+		/* Test string converted to binary correct
 		System.out.println(str);
 		System.out.println(s.val());
 		System.out.println(Long.toBinaryString(s.val()));
 		System.out.println(Long.toBinaryString(s.val()).length());
+		*/
+		
+		/* Test parseSequences
+		Sequence[] sa = Sequence.parseSequences(str, 3);
+		System.out.println("\n\nhere");
+		for (Sequence s: sa) {
+			
+			System.out.println(s.val());
+		}
+		*/
 	}
 
 }
