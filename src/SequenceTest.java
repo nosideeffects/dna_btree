@@ -6,7 +6,7 @@ public class SequenceTest {
 	 */
 	public static void main(String[] args) {
 		
-		String str = "nnnnnnnacgnnnnnnn";
+		String str = "acg";
 		//Sequence s = new Sequence(str, 3);
 		
 		/* Test string converted to binary correct
@@ -18,10 +18,12 @@ public class SequenceTest {
 		
 		/* Test parseSequences
 		Sequence[] sa = Sequence.parseSequences(str, 3);
-		System.out.println("\n\nhere");
+		System.out.println("\nhere");
 		for (Sequence s: sa) {
 			
 			System.out.println(s.val());
+			System.out.println(Long.toBinaryString(s.val()));
+			System.out.println(Sequence.toSequence(s));
 		}*/
 		
 	}

@@ -31,6 +31,7 @@ public class Sequence implements Comparable<Sequence> {
 			throw new IllegalArgumentException("Input String length ("+str.length()+") was different from sequenceLength ("+sequenceLength+")");
 		}
 		
+		this.length = sequenceLength;
 		char c;
 		
 		for (int i = 0, p = str.length() - 1; p >= 0; i++, p--) {
@@ -79,12 +80,43 @@ public class Sequence implements Comparable<Sequence> {
 				i += s.indexOf('n');
 				continue;
 			}
-			//System.out.println(s);
+			System.out.println(s);
 			
 			al.add(new Sequence(s, sequenceLength));
 		}
 		
 		return al.toArray(new Sequence[al.size()]);
+	}
+	
+	public static String toSequence(Sequence s) {
+		
+		String str = Long.toBinaryString(s.val());
+		String r = "";
+		
+		while (str.length() < s.length * 2) {
+			
+			str = "0" + str;
+		}
+		
+		for (int i = 0; i < str.length(); i += 2) {
+			
+			switch (Integer.parseInt(str.substring(i, i+2))) {
+				case 0:
+					r += "a";
+					break;
+				case 1:
+					r += "c";
+					break;
+				case 10:
+					r += "g";
+					break;
+				case 11:
+					r += "t";
+					break;
+			}
+		}
+		
+		return r;
 	}
 	
 	public Long val(){
