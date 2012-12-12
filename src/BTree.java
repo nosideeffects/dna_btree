@@ -66,7 +66,6 @@ public class BTree<T extends Comparable<T>> {
 		private Object[] keys;
 		private Object[] children; 
 		
-		@SuppressWarnings("unchecked")
 		public BTreeNode(){
 			this.leaf = true;
 			
