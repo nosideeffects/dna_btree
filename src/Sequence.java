@@ -6,7 +6,7 @@
  *
  */
 public class Sequence implements Comparable<Sequence> {
-	private Long seq;
+	private Long seq = 0L;
 	private int length;
 	
 	/**
@@ -30,14 +30,17 @@ public class Sequence implements Comparable<Sequence> {
 		}
 		
 		char c;
+		int strlen = str.length();
 		
-		for (int i = 0, p = str.length() - 1; i < str.length(); i++, p--) {
+		for (int i = 0, p = strlen - 1; i < strlen; i++, p--) {
 			
+			System.out.println("i:" + i + " p:" + p);
 			c = str.charAt(p);
 			switch (c) {
 			
 				case ' ':
 					i--;
+					strlen--;
 					break;
 					
 				case 'A':
