@@ -6,7 +6,7 @@ public class SequenceTest {
 	 */
 	public static void main(String[] args) {
 		
-		String str = "acn";
+		String str = "nnnnnnnacgnnnnnnn";
 		//Sequence s = new Sequence(str, 3);
 		
 		/* Test string converted to binary correct
@@ -22,8 +22,8 @@ public class SequenceTest {
 		for (Sequence s: sa) {
 			
 			System.out.println(s.val());
-		}
-		*/
+		}*/
+		
 	}
 
 }
