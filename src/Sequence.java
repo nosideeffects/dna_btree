@@ -30,9 +30,8 @@ public class Sequence implements Comparable<Sequence> {
 		}
 		
 		char c;
-		int strlen = str.length();
 		
-		for (int i = 0, p = strlen - 1; i < strlen; i++, p--) {
+		for (int i = 0, p = str.length() - 1; p >= 0; i++, p--) {
 			
 			System.out.println("i:" + i + " p:" + p);
 			c = str.charAt(p);
@@ -40,7 +39,6 @@ public class Sequence implements Comparable<Sequence> {
 			
 				case ' ':
 					i--;
-					strlen--;
 					break;
 					
 				case 'A':
