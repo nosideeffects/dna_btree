@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * A Java Long disguised with a fancier name
  * and some useful methods to represent a
@@ -63,6 +65,14 @@ public class Sequence implements Comparable<Sequence> {
 		}
 	}
 
+	public static Sequence[] parseSequences(String str, int sequenceLength){
+		// TODO: Parse any length string into all possible subsequences
+		// 'str' must be void of any whitespace and numbers
+		ArrayList<Sequence> al = new ArrayList<Sequence>();
+		
+		return (Sequence[]) al.toArray();
+	}
+	
 	public Long val(){
 		return this.seq;
 	}
