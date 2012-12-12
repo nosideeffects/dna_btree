@@ -21,7 +21,7 @@ public class GeneBankCreateBTree {
 		try {
 			
 			degree = Integer.parseInt(args[0]);
-			gbkFile = args[1];
+			gbkFile = "data/" + args[1];
 			sequenceLength = Integer.parseInt(args[2]);
 			
 			if (sequenceLength < 1 || sequenceLength > 31) {
@@ -52,8 +52,26 @@ public class GeneBankCreateBTree {
 			BufferedReader br = new BufferedReader(new InputStreamReader(dis));
 			String line = "", extra = "", pattern ="[\\s\\d]";
 			Sequence[] sa;
+			boolean startSequences = false;
 			
 			while ((line = br.readLine()) != null) {
+				
+				// Wait to read sequences until we see ORIGIN. Stop reading when we see //.
+				if (!startSequences) {
+					
+					if (line.contains("ORIGIN")) {
+						
+						startSequences = true;
+					}
+					continue;
+				} else {
+					
+					if (line.contains("//")) {
+						
+						startSequences = false;
+						continue;
+					}
+				}
 				
 				line = line.replaceAll(pattern, "");
 				line = extra + line;
