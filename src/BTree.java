@@ -162,10 +162,10 @@ public class BTree<T extends Comparable<T>> {
 				
 				this.save();
 			} else {
-				while(i >= 1 && key.compareTo(this.getKey(i).key()) < 0 ) {
+				while(i >= 0 && key.compareTo(this.getKey(i).key()) < 0 ) {
 					i--;
 				}
-				i--;
+				i++;
 				this.getChild(i).load();
 				if (this.getChild(i).isFull()) {
 					this.splitChild(i);
