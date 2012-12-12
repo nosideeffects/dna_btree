@@ -63,8 +63,8 @@ public class BTree<T extends Comparable<T>> {
 		 * Number of keys.
 		 */
 		private int n;
-		private ArrayList<TreeObject<T>> keys;
-		private ArrayList<BTreeNode<T>> children; 
+		private Object[] keys;
+		private Object[] children; 
 		
 		@SuppressWarnings("unchecked")
 		public BTreeNode(){
@@ -72,23 +72,23 @@ public class BTree<T extends Comparable<T>> {
 			
 			this.n = 0;
 			
-			this.keys = new ArrayList<TreeObject<T>>(degree * 2 - 1);
-			this.children = new ArrayList<BTreeNode<T>>(degree * 2);
+			this.keys = new Object[degree * 2 - 1];
+			this.children = new Object[degree * 2];
 			
 			this.key = 0;
 		}
 		
 		public void setChild(int index, BTreeNode<T> node){
-			children.set(index, node);
+			children[index] = node;
 		}
 		
 		public BTreeNode<T> getChild(int index){
-			return children.get(index);
+			return (BTreeNode<T>) children[index];
 		}
 		
 		public BTreeNode<T> removeChild(int index){
-			BTreeNode<T> c = children.get(index);
-			children.remove(index);
+			BTreeNode<T> c = (BTreeNode<T>) children[index];
+			children[index] = null;
 			return c;
 		}
 		
@@ -127,16 +127,16 @@ public class BTree<T extends Comparable<T>> {
 		}
 
 		public void setKey(int index, TreeObject<T> obj){
-			keys.set(index, obj);
+			keys[index] = obj;
 		}
 		
 		public TreeObject<T> getKey(int index){
-			return keys.get(index);
+			return (TreeObject<T>) keys[index];
 		}
 		
 		public TreeObject<T> removeKey(int index){
-			TreeObject<T> k = keys.get(index);
-			keys.remove(index);
+			TreeObject<T> k = (TreeObject<T>) keys[index];
+			keys[index] = null;
 			return k;
 		}
 		
