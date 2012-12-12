@@ -36,6 +36,10 @@ public class Sequence implements Comparable<Sequence> {
 			c = str.charAt(p);
 			switch (c) {
 			
+				case ' ':
+					i--;
+					break;
+					
 				case 'A':
 				case 'a':
 					break;
