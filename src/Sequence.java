@@ -29,7 +29,33 @@ public class Sequence implements Comparable<Sequence> {
 			throw new IllegalArgumentException("Input String length ("+str.length()+") was different from sequenceLength ("+sequenceLength+")");
 		}
 		
+		char c;
 		
+		for (int i = 0, p = str.length() - 1; i < str.length(); i++, p--) {
+			
+			c = str.charAt(p);
+			switch (c) {
+			
+				case 'A':
+				case 'a':
+					break;
+					
+				case 'T':
+				case 't':
+					seq += (long) 3 * (long) Math.pow(2, i*2);
+					break;
+					
+				case 'C':
+				case 'c':
+					seq += (long) 1 * (long) Math.pow(2, i*2);
+					break;
+					
+				case 'G':
+				case 'g':
+					seq += (long) 2 * (long) Math.pow(2, i*2);
+					break;
+			}
+		}
 	}
 
 	public Long val(){
