@@ -144,7 +144,7 @@ public class BTree<T extends Comparable<T>> {
 		 * @param key key to insert
 		 */
 		public void insert(T key){
-			int i = this.n - 1;
+			int i = this.n;
 			if (this.isLeaf()) {
 				while (i >= 0 && key.compareTo(this.getKey(i).key()) < 0 ) {
 					this.setKey(i+1, this.removeKey(i));
