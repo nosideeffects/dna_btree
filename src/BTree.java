@@ -59,6 +59,9 @@ public class BTree<T extends Comparable<T>> {
 	private class BTreeNode<T extends Comparable<T>> {
 		private boolean leaf;
 		private long key;
+		/**
+		 * Number of keys.
+		 */
 		private int n;
 		private TreeObject<T>[] keys;
 		private BTreeNode<T>[] children; 
@@ -142,14 +145,21 @@ public class BTree<T extends Comparable<T>> {
 		 * @param key key to insert
 		 */
 		public void insert(T key){
-			int i = this.n;
+			int i = this.n - 1;
 			if (this.isLeaf()) {
 				while (i >= 0 && key.compareTo(this.getKey(i).key()) < 0 ) {
 					this.setKey(i+1, this.removeKey(i));
 					i--;
 				}
-				this.setKey(i+1,new TreeObject<T>(key));
-				this.n = this.n + 1;
+				
+				// If key already exists in tree, increment frequency
+				if (key.compareTo(this.getKey(i).key()) == 0) {
+					this.getKey(i).incrementFrequency();
+				} else {
+					this.setKey(i+1,new TreeObject<T>(key));
+					this.n = this.n + 1;
+				}
+				
 				this.save();
 			} else {
 				while(i >= 1 && key.compareTo(this.getKey(i).key()) < 0 ) {
