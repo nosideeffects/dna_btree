@@ -50,16 +50,25 @@ public class GeneBankCreateBTree {
 			FileInputStream fis = new FileInputStream(gbkFile);
 			DataInputStream dis = new DataInputStream(fis);
 			BufferedReader br = new BufferedReader(new InputStreamReader(dis));
-			String line = "", pattern ="[\\s\\d]";
+			String line = "", extra = "", pattern ="[\\s\\d]";
+			Sequence[] sa;
 			
 			while ((line = br.readLine()) != null) {
 				
 				line = line.replaceAll(pattern, "");
+				line = extra + line;
 				
-				//@TODO Run static sequence method
-				//Sequence s = new Sequence();
-				//btree.insert(s);
+				sa = Sequence.parseSequences(line, sequenceLength);
+				
+				for (Sequence s: sa) {
+					
+					btree.insert(s);
+				}
+				
+				extra = line.substring(line.length() - sequenceLength + 1);
 			}
+			
+			//@TODO gbkFile added to BTree. Now write to disk.
 			
 			dis.close();
 		} catch (FileNotFoundException e) {
