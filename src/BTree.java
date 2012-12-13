@@ -51,18 +51,18 @@ public class BTree<T extends Comparable<T>> {
 		
 		if (t_obj != null) {
 			t_obj.incrementFrequency();
-		}
-		
-		BTreeNode<T> r = root;
-		if (r.isFull()) {
-			BTreeNode<T> s = new BTreeNode<T>();
-			this.root = s;
-
-			s.setChild(0, r);
-			s.splitChild(0);
-			s.insert(key);
 		} else {
-			r.insert(key);
+			BTreeNode<T> r = root;
+			if (r.isFull()) {
+				BTreeNode<T> s = new BTreeNode<T>();
+				this.root = s;
+	
+				s.setChild(0, r);
+				s.splitChild(0);
+				s.insert(key);
+			} else {
+				r.insert(key);
+			}
 		}
 	}
 	
