@@ -65,7 +65,7 @@ public class BTree<T extends Comparable<T>> {
 	public T search(T key) {
 		
 		// TODO: Search BTree for Key, return if exists, return null otherwise
-		return root.search(key);
+		return root.search(key).getKey();
 	}
 
 	@SuppressWarnings("hiding")
@@ -90,7 +90,7 @@ public class BTree<T extends Comparable<T>> {
 			this.key = 0;
 		}
 
-		public T search(T key) {
+		public TreeObject<T> search(T key) {
 			// TODO: Search Node and/or children for node, returning if it exists
 			return null;
 		}
@@ -171,7 +171,7 @@ public class BTree<T extends Comparable<T>> {
 			int i = this.n - 1;
 			if (this.isLeaf()) {
 				while (i >= 0 && (this.getKey(i) != null)
-						&& key.compareTo(this.getKey(i).key()) < 0) {
+						&& key.compareTo(this.getKey(i).getKey()) < 0) {
 					this.setKey(i + 1, this.removeKey(i));
 					i--;
 				}
@@ -181,14 +181,14 @@ public class BTree<T extends Comparable<T>> {
 
 				this.save();
 			} else {
-				while (i >= 0 && key.compareTo(this.getKey(i).key()) < 0) {
+				while (i >= 0 && key.compareTo(this.getKey(i).getKey()) < 0) {
 					i--;
 				}
 				i++;
 				this.getChild(i).load();
 				if (this.getChild(i).isFull()) {
 					this.splitChild(i);
-					if (key.compareTo(this.getKey(i).key()) > 0) {
+					if (key.compareTo(this.getKey(i).getKey()) > 0) {
 						i++;
 					}
 				}
@@ -251,7 +251,7 @@ public class BTree<T extends Comparable<T>> {
 			this.key = key;
 		}
 
-		public T key() {
+		public T getKey() {
 			return this.key;
 		}
 
