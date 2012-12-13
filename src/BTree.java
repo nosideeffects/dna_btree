@@ -57,6 +57,19 @@ public class BTree<T extends Comparable<T>> {
 			r.insert(key);
 		}
 	}
+	
+	public String search(Sequence s) {
+		
+		//@TODO search and return TreeObject, if exists
+		TreeObject<T> to = null;
+		
+		if (to == null) {
+			
+			return "Sequence does not exist.";
+		}
+		
+		return to.frequency + " " + to.key;
+	}
 
 	private class BTreeNode<T extends Comparable<T>> {
 		private boolean leaf;
