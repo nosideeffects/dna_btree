@@ -57,6 +57,7 @@ public class BTree<T extends Comparable<T>> {
 			if (r.isFull()) {
 				BTreeNode<T> s = new BTreeNode<T>();
 				this.root = s;
+				s.isLeaf(false);
 
 				s.setChild(0, r);
 				s.splitChild(0);
@@ -195,7 +196,7 @@ public class BTree<T extends Comparable<T>> {
 
 			y.n(degree - 1);
 
-			for (int j = this.n(); j >= index + 1; j--) {
+			for (int j = this.n; j >= index + 1; j--) {
 				this.setChild(j + 1, this.removeChild(j));
 			}
 			this.setChild(index + 1, z);
@@ -297,7 +298,7 @@ public class BTree<T extends Comparable<T>> {
 		 * @return
 		 */
 		public boolean isFull() {
-			return n() == (2 * degree) - 1;
+			return this.n == (2 * degree) - 1;
 		}
 
 		public boolean isLeaf() {
