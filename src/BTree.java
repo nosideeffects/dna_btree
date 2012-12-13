@@ -45,6 +45,9 @@ public class BTree<T extends Comparable<T>> {
 	}
 
 	public void insert(T key) {
+		// TODO: Search for key first, to increment if duplicate
+		// search(key)
+		
 		BTreeNode<T> r = root;
 		if (r.isFull()) {
 			BTreeNode<T> s = new BTreeNode<T>();
@@ -58,17 +61,10 @@ public class BTree<T extends Comparable<T>> {
 		}
 	}
 	
-	public String search(Sequence s) {
+	public T search(T key) {
 		
-		//@TODO search and return TreeObject, if exists
-		TreeObject<T> to = null;
-		
-		if (to == null) {
-			
-			return "Sequence does not exist.";
-		}
-		
-		return to.frequency + " " + to.key;
+		// TODO: Search BTree for Key, return if exists, return null otherwise
+		return root.search(key);
 	}
 
 	private class BTreeNode<T extends Comparable<T>> {
@@ -90,6 +86,11 @@ public class BTree<T extends Comparable<T>> {
 			this.children = new Object[degree * 2];
 
 			this.key = 0;
+		}
+
+		public T search(T key) {
+			// TODO: Search Node and/or children for node, returning if it exists
+			return null;
 		}
 
 		public void setChild(int index, BTreeNode<T> node) {
