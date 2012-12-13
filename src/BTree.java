@@ -161,7 +161,7 @@ public class BTree<T extends Comparable<T>> {
 		 *          key to insert
 		 */
 		public void insert(T key) {
-			int i = this.n;
+			int i = this.n - 1;
 			if (this.isLeaf()) {
 				while (i >= 0 && (this.getKey(i) != null)
 						&& key.compareTo(this.getKey(i).key()) < 0) {
@@ -169,13 +169,8 @@ public class BTree<T extends Comparable<T>> {
 					i--;
 				}
 
-				// If key already exists in tree, increment frequency
-				if (this.getKey(i) != null && key.compareTo(this.getKey(i).key()) == 0) {
-					this.getKey(i).incrementFrequency();
-				} else {
-					this.setKey(i + 1, new TreeObject<T>(key));
-					this.n = this.n + 1;
-				}
+				this.setKey(i + 1, new TreeObject<T>(key));
+				this.n += + 1;
 
 				this.save();
 			} else {
