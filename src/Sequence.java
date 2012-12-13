@@ -138,7 +138,7 @@ public class Sequence implements Comparable<Sequence> {
 	public int compareTo(Sequence that) {
 		if (this.val() > that.val()) {
 			return 1;
-		} else if(this.val() == that.val()) {
+		} else if(this.val().equals(that.val())) {
 			return 0;
 		}
 		return -1;
