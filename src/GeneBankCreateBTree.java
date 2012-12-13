@@ -69,6 +69,7 @@ public class GeneBankCreateBTree {
 					if (line.contains("//")) {
 						
 						startSequences = false;
+						extra = "";
 						continue;
 					}
 				}
