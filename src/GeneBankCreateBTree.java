@@ -83,7 +83,7 @@ public class GeneBankCreateBTree {
 					btree.insert(s);
 				}
 				
-				extra = line.substring(line.length() - sequenceLength + 1);
+				extra = line.substring(line.length() - sequenceLength);
 			}
 			
 			//@TODO gbkFile added to BTree. Now write to disk.

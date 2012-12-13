@@ -142,25 +142,26 @@ public class BTree<T extends Comparable<T>> {
 			BTreeNode<T> y = getChild(index);
 
 			z.isLeaf(y.isLeaf());
-			z.n(y.n());
+			z.n(degree-1);
 
-			for (int j = 0; j <= degree - 1; j++) {
-				z.setKey(j, y.removeKey(j + degree - 1));
+			for (int j = 0; j <= degree - 2; j++) {
+				z.setKey(j, y.removeKey(j + degree));
 			}
 
 			if (!y.isLeaf()) {
-				for (int j = 0; j <= degree; j++) {
-					z.setChild(j, y.removeChild(j + degree - 1));
+				for (int j = 0; j <= degree - 1; j++) {
+					z.setChild(j, y.removeChild(j + degree));
 				}
 			}
-			y.n(degree - 2);
+			
+			y.n(degree - 1);
 
-			for (int j = this.n() + 1; j > index + 1; j--) {
+			for (int j = this.n(); j >= index + 1; j--) {
 				this.setChild(j + 1, this.removeChild(j));
 			}
 			this.setChild(index + 1, z);
 
-			for (int j = this.n(); j > index; j--) {
+			for (int j = this.n() - 1; j >= index; j--) {
 				this.setKey(j + 1, this.removeKey(j));
 			}
 			this.setKey(index, y.removeKey(degree - 1));
@@ -203,7 +204,7 @@ public class BTree<T extends Comparable<T>> {
 				}
 
 				this.setKey(i + 1, new TreeObject<T>(key));
-				this.n += + 1;
+				this.n += 1;
 
 				this.save();
 			} else {
