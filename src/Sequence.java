@@ -131,7 +131,7 @@ public class Sequence implements Comparable<Sequence> {
 	
 	public String toString() {
 		
-		return toSequence(this);
+		return Sequence.toSequence(this);
 	}
 
 	@Override

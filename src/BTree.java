@@ -48,6 +48,7 @@ public class BTree<T extends Comparable<T>> {
 		// TODO: Search for key first, to increment if duplicate
 		// search(key)
 		
+		
 		BTreeNode<T> r = root;
 		if (r.isFull()) {
 			BTreeNode<T> s = new BTreeNode<T>();
