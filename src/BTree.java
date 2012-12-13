@@ -91,17 +91,19 @@ public class BTree<T extends Comparable<T>> {
 	private void build(BTreeNode<T> node, int height, String prevLevel, int child) {
 		String thisLevel = "";
 		for (int i = 0; i < height; i++) {
-			sb.append("/t");
+			sb.append("\t");
 		}
 		sb.append("--> ");
 		sb.append(node.toString());
 		sb.append("(");
 		sb.append(prevLevel);
 		sb.append(".c" + child);
-		sb.append(")/n");
+		sb.append(")\n");
 		thisLevel = prevLevel + ".c" + child;
 		for (Object obj : node.children) {
-			build(node, height + 1, thisLevel, child + 1);
+			if (obj != null) {
+				build((BTreeNode<T>) obj, height + 1, thisLevel, child + 1);
+			}
 		}
 	}
 
