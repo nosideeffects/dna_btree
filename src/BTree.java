@@ -9,7 +9,6 @@ public class BTree<T extends Comparable<T>> {
 
 	private int degree;
 	private BTreeNode<T> root;
-	private StringBuffer sb = new StringBuffer();
 
 	public BTree(int degree) {
 
@@ -80,14 +79,16 @@ public class BTree<T extends Comparable<T>> {
 		return root.search(key);
 	}
 
-	private void build() {
+	private String build() {
+		StringBuilder sb = new StringBuilder();
 		sb.append(root.toString());
 		sb.append(" (head)\n");
-		build(root, 0, "head", 0, true);
+		build(sb, root, 0, "head", 0, true);
+		return sb.toString();
 	}
 
-	private void build(BTreeNode<T> node, int height, String prevLevel,
-			int child, boolean first) {
+	private void build(StringBuilder sb, BTreeNode<T> node, int height,
+			String prevLevel, int child, boolean first) {
 		String thisLevel = "";
 		for (int i = 0; i < height; i++) {
 			sb.append("  ");
@@ -107,15 +108,14 @@ public class BTree<T extends Comparable<T>> {
 		int i = 1;
 		for (Object obj : node.children) {
 			if (obj != null) {
-				build((BTreeNode<T>) obj, height + 1, thisLevel, i, false);
+				build(sb, (BTreeNode<T>) obj, height + 1, thisLevel, i, false);
 				i++;
 			}
 		}
 	}
 
 	public String toString() {
-		build();
-		return sb.toString();
+		return build();
 	}
 
 	@SuppressWarnings("hiding")
@@ -306,14 +306,16 @@ public class BTree<T extends Comparable<T>> {
 		}
 
 		public String toString() {
-			StringBuffer sb = new StringBuffer();
+			StringBuilder sb = new StringBuilder();
 			sb.append("[");
 			for (Object obj : keys) {
 				if (obj != null) {
 					sb.append(obj.toString());
-					sb.append(" ");
+					sb.append(", ");
 				}
 			}
+			int l = sb.length();
+			sb.delete(l - 2, l);
 			sb.append("]");
 			return sb.toString();
 		}
