@@ -140,6 +140,11 @@ public class BTree<T extends Comparable<T>> {
 			this.key = 0;
 		}
 
+		public BTreeNode(Long key) {
+			this.key = key;
+			this.load();
+		}
+
 		public TreeObject<T> search(T key) {
 			int i = this.n - 1;
 			while (i >= 0 && key.compareTo(this.getKey(i).getKey()) < 0) {
@@ -260,11 +265,11 @@ public class BTree<T extends Comparable<T>> {
 		}
 
 		/**
-		 * Loads node from disk.
+		 * Load from disk based on key.
 		 */
 		private void load() {
 			// TODO Auto-generated method stub
-
+			
 		}
 
 		/**
@@ -320,6 +325,25 @@ public class BTree<T extends Comparable<T>> {
 			return sb.toString();
 		}
 
+	}
+	
+	/**
+	 * Contains key (byte offset) of a child node.
+	 */
+	private class NodeKey{
+		private Long key;
+		
+		public NodeKey(Long key){
+			this.key = key;
+		}
+		
+		/**
+		 * Loads node from disk.
+		 */
+		public BTreeNode<T> load() {
+			// TODO Auto-generated method stub
+			return new BTreeNode<T>(key);
+		}
 	}
 
 	private class TreeObject<T extends Comparable<T>> {
