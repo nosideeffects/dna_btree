@@ -47,11 +47,11 @@ public class BTree<T extends Comparable<T>> {
 	public void insert(T key) {
 		// TODO: Search for key first, to increment if duplicate
 		
-		//TreeObject<T> t_obj = findKeyObject(key);
-		//
-		//if (t_obj != null) {
-		//	t_obj.incrementFrequency();
-		//}
+		TreeObject<T> t_obj = findKeyObject(key);
+		
+		if (t_obj != null) {
+			t_obj.incrementFrequency();
+		}
 		
 		BTreeNode<T> r = root;
 		if (r.isFull()) {
