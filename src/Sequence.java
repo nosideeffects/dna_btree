@@ -80,7 +80,7 @@ public class Sequence implements Comparable<Sequence> {
 				i += s.indexOf('n');
 				continue;
 			}
-			System.out.println(s);
+			// System.out.println(s);
 			
 			al.add(new Sequence(s, sequenceLength));
 		}
