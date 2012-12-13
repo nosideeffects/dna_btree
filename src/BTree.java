@@ -68,6 +68,7 @@ public class BTree<T extends Comparable<T>> {
 		return root.search(key);
 	}
 
+	@SuppressWarnings("hiding")
 	private class BTreeNode<T extends Comparable<T>> {
 		private boolean leaf;
 		private long key;
@@ -98,10 +99,12 @@ public class BTree<T extends Comparable<T>> {
 			children[index] = node;
 		}
 
+		@SuppressWarnings("unchecked")
 		public BTreeNode<T> getChild(int index) {
 			return (BTreeNode<T>) children[index];
 		}
 
+		@SuppressWarnings("unchecked")
 		public BTreeNode<T> removeChild(int index) {
 			BTreeNode<T> c = (BTreeNode<T>) children[index];
 			children[index] = null;
@@ -146,10 +149,12 @@ public class BTree<T extends Comparable<T>> {
 			keys[index] = obj;
 		}
 
+		@SuppressWarnings("unchecked")
 		public TreeObject<T> getKey(int index) {
 			return (TreeObject<T>) keys[index];
 		}
-
+		
+		@SuppressWarnings("unchecked")
 		public TreeObject<T> removeKey(int index) {
 			TreeObject<T> k = (TreeObject<T>) keys[index];
 			keys[index] = null;
