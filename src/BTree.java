@@ -105,6 +105,19 @@ public class BTree<T extends Comparable<T>> {
 
 		public TreeObject<T> search(T key) {
 			// TODO: Search Node and/or children for node, returning if it exists
+			int i = this.n - 1;
+			while (i >= 0 && key.compareTo(this.getKey(i).getKey()) < 0) {
+				i--;
+			}
+			
+			// If the key was found
+			if (i >= 0 && key.compareTo(this.getKey(i).getKey()) == 0) {
+				return this.getKey(i);
+				
+			// If there are more children to search
+			} else if (!this.isLeaf()) {
+				return this.getChild(i+1).search(key);
+			}
 			return null;
 		}
 
