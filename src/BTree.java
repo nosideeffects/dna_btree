@@ -85,25 +85,31 @@ public class BTree<T extends Comparable<T>> {
 	private void build() {
 		sb.append(root.toString());
 		sb.append(" (head)\n");
-		build(root, 0, "head", 0);
+		build(root, 0, "head", 0, true);
 	}
 
-	private void build(BTreeNode<T> node, int height, String prevLevel, int child) {
+	private void build(BTreeNode<T> node, int height, String prevLevel,
+			int child, boolean first) {
 		String thisLevel = "";
 		for (int i = 0; i < height; i++) {
-			sb.append("\t");
+			sb.append("  ");
 		}
-		sb.append("--> ");
-		sb.append(node.toString());
-		sb.append("(");
-		sb.append(prevLevel);
-		sb.append(".c" + child);
-		sb.append(")\n");
-		thisLevel = prevLevel + ".c" + child;
+		if (!first) {
+			sb.append("--> ");
+			sb.append(node.toString());
+			sb.append("(");
+			sb.append(prevLevel);
+			sb.append(".c" + child);
+			sb.append(")\n");
+			thisLevel = prevLevel + ".c" + child;
+			first = false;
+		} else {
+			thisLevel = prevLevel;
+		}
 		int i = 1;
 		for (Object obj : node.children) {
 			if (obj != null) {
-				build((BTreeNode<T>) obj, height + 1, thisLevel, i);
+				build((BTreeNode<T>) obj, height + 1, thisLevel, i, false);
 				i++;
 			}
 		}
