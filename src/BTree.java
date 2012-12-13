@@ -82,10 +82,10 @@ public class BTree<T extends Comparable<T>> {
 		return root.search(key);
 	}
 
-	private void build(BTreeNode<T> head) {
-		sb.append(head.toString());
+	private void build() {
+		sb.append(root.toString());
 		sb.append(" (head)/n");
-		build(head, 0, "head", 0);
+		build(root, 0, "head", 0);
 	}
 
 	private void build(BTreeNode<T> node, int height, String prevLevel, int child) {
