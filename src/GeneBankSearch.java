@@ -71,17 +71,16 @@ public class GeneBankSearch {
 			ArrayList<String> results = new ArrayList<String>();
 			
 			//@TODO Read sequences and search, print/store results
-			/*
 			while ((str = br.readLine()) != null) {
 				
-				results.add(btree.search(new Sequence(str, str.length())));
+				results.add(btree.search(new Sequence(str, str.length())).toString());
 			}
 			
 			for (String result: results) {
 			
 				System.out.println(result);
 			}
-			*/
+			
 			
 			dis.close();
 		} catch (FileNotFoundException e) {
