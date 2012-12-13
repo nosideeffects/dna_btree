@@ -337,7 +337,7 @@ public class BTree<T extends Comparable<T>> {
 
 		public String toString() {
 			String str = "";
-			str = key.toString() + "(" + frequency + ")";
+			str = key.toString() + " (" + frequency + ")";
 			return str;
 		}
 	}
