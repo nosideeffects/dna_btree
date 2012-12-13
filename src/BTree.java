@@ -328,7 +328,8 @@ public class BTree<T extends Comparable<T>> {
 		private T key;
 
 		public TreeObject(T key) {
-			this.key = key;
+			this.key = key; 
+			this.frequency = 1;
 		}
 
 		public T getKey() {
