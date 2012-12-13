@@ -9,6 +9,7 @@ public class BTree<T extends Comparable<T>> {
 
 	private int degree;
 	private BTreeNode<T> root;
+	private StringBuffer sb = new StringBuffer();
 
 	public BTree(int degree) {
 
@@ -46,9 +47,9 @@ public class BTree<T extends Comparable<T>> {
 
 	public void insert(T key) {
 		// TODO: Search for key first, to increment if duplicate
-		
+
 		TreeObject<T> t_obj = findKeyObject(key);
-		
+
 		if (t_obj != null) {
 			t_obj.incrementFrequency();
 		} else {
@@ -56,7 +57,7 @@ public class BTree<T extends Comparable<T>> {
 			if (r.isFull()) {
 				BTreeNode<T> s = new BTreeNode<T>();
 				this.root = s;
-	
+
 				s.setChild(0, r);
 				s.splitChild(0);
 				s.insert(key);
@@ -65,20 +66,43 @@ public class BTree<T extends Comparable<T>> {
 			}
 		}
 	}
-	
+
 	public T search(T key) {
 		// TODO: Search BTree for Key, return if exists, return null otherwise
 		TreeObject<T> t_obj = findKeyObject(key);
-		
+
 		if (t_obj != null) {
 			return t_obj.getKey();
 		}
-		
+
 		return null;
 	}
-	
-	private TreeObject<T> findKeyObject(T key){
+
+	private TreeObject<T> findKeyObject(T key) {
 		return root.search(key);
+	}
+
+	private void build(BTreeNode<T> head) {
+		sb.append(head.toString());
+		sb.append(" (head)/n");
+		build(head, 0, "head", 0);
+	}
+
+	private void build(BTreeNode<T> node, int height, String prevLevel, int child) {
+		String thisLevel = "";
+		for (int i = 0; i < height; i++) {
+			sb.append("/t");
+		}
+		sb.append("--> ");
+		sb.append(node.toString());
+		sb.append("(");
+		sb.append(prevLevel);
+		sb.append(".c" + child);
+		sb.append(")/n");
+		thisLevel = prevLevel + ".c" + child;
+		for (Object obj : node.keys) {
+			build(node, height + 1, thisLevel, child + 1);
+		}
 	}
 
 	@SuppressWarnings("hiding")
@@ -109,14 +133,14 @@ public class BTree<T extends Comparable<T>> {
 			while (i >= 0 && key.compareTo(this.getKey(i).getKey()) < 0) {
 				i--;
 			}
-			
+
 			// If the key was found
 			if (i >= 0 && key.compareTo(this.getKey(i).getKey()) == 0) {
 				return this.getKey(i);
-				
-			// If there are more children to search
+
+				// If there are more children to search
 			} else if (!this.isLeaf()) {
-				return this.getChild(i+1).search(key);
+				return this.getChild(i + 1).search(key);
 			}
 			return null;
 		}
@@ -142,7 +166,7 @@ public class BTree<T extends Comparable<T>> {
 			BTreeNode<T> y = getChild(index);
 
 			z.isLeaf(y.isLeaf());
-			z.n(degree-1);
+			z.n(degree - 1);
 
 			for (int j = 0; j <= degree - 2; j++) {
 				z.setKey(j, y.removeKey(j + degree));
@@ -153,7 +177,7 @@ public class BTree<T extends Comparable<T>> {
 					z.setChild(j, y.removeChild(j + degree));
 				}
 			}
-			
+
 			y.n(degree - 1);
 
 			for (int j = this.n(); j >= index + 1; j--) {
@@ -180,7 +204,7 @@ public class BTree<T extends Comparable<T>> {
 		public TreeObject<T> getKey(int index) {
 			return (TreeObject<T>) keys[index];
 		}
-		
+
 		@SuppressWarnings("unchecked")
 		public TreeObject<T> removeKey(int index) {
 			TreeObject<T> k = (TreeObject<T>) keys[index];
@@ -268,6 +292,18 @@ public class BTree<T extends Comparable<T>> {
 		public void isLeaf(boolean leaf) {
 			this.leaf = leaf;
 		}
+
+		public String toString() {
+			StringBuffer sb = new StringBuffer();
+			sb.append("[");
+			for (Object obj : keys) {
+				sb.append(obj.toString());
+				sb.append(" ");
+			}
+			sb.append("]");
+			return sb.toString();
+		}
+
 	}
 
 	private class TreeObject<T extends Comparable<T>> {
@@ -288,6 +324,12 @@ public class BTree<T extends Comparable<T>> {
 
 		public void incrementFrequency() {
 			this.frequency++;
+		}
+
+		public String toString() {
+			String str = "";
+			str = key.toString() + "(" + frequency + ")";
+			return str;
 		}
 	}
 }
