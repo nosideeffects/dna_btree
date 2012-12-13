@@ -119,8 +119,19 @@ public class Sequence implements Comparable<Sequence> {
 		return r;
 	}
 	
-	public Long val(){
+	public int getSequenceLength() {
+		
+		return length;
+	}
+	
+	public Long val() {
+		
 		return this.seq;
+	}
+	
+	public String toString() {
+		
+		return toSequence(this);
 	}
 
 	@Override

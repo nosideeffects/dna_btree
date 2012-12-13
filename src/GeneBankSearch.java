@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.ArrayList;
 
 public class GeneBankSearch {
 
@@ -6,7 +7,8 @@ public class GeneBankSearch {
 		
 		BTree btree = null;
 		String bTreeFile = "", queryFile = "";
-		int debugLevel = 0;
+		ArrayList<Sequence> queries = new ArrayList<Sequence>();
+		int debugLevel = 0, sequenceLength = 0;
 		
 		// Get parameters
 		try {
@@ -65,13 +67,19 @@ public class GeneBankSearch {
 			FileInputStream fis = new FileInputStream(queryFile);
 			DataInputStream dis = new DataInputStream(fis);
 			BufferedReader br = new BufferedReader(new InputStreamReader(dis));
-			String sequence = "", results = "";
+			String str = "";
+			ArrayList<String> results = new ArrayList<String>();
 			
 			//@TODO Read sequences and search, print/store results
 			/*
-			while ((sequence = br.readLine()) != null) {
+			while ((str = br.readLine()) != null) {
 				
-				results = btree.search(sequence);
+				results.add(btree.search(new Sequence(str, str.length())));
+			}
+			
+			for (String result: results) {
+			
+				System.out.println(result);
 			}
 			*/
 			
