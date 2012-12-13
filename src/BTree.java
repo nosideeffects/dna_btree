@@ -100,9 +100,14 @@ public class BTree<T extends Comparable<T>> {
 		sb.append(".c" + child);
 		sb.append(")/n");
 		thisLevel = prevLevel + ".c" + child;
-		for (Object obj : node.keys) {
+		for (Object obj : node.children) {
 			build(node, height + 1, thisLevel, child + 1);
 		}
+	}
+
+	public String toString() {
+		build();
+		return sb.toString();
 	}
 
 	@SuppressWarnings("hiding")
@@ -297,8 +302,10 @@ public class BTree<T extends Comparable<T>> {
 			StringBuffer sb = new StringBuffer();
 			sb.append("[");
 			for (Object obj : keys) {
-				sb.append(obj.toString());
-				sb.append(" ");
+				if (obj != null) {
+					sb.append(obj.toString());
+					sb.append(" ");
+				}
 			}
 			sb.append("]");
 			return sb.toString();
