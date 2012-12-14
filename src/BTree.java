@@ -26,10 +26,15 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 		this.degree = degree;
 
-		if (degree < 1) {
+		if (degree < 0) {
 
 			System.err.println("Invalid degree. Must be a positive integer.");
 			System.exit(3);
+		}
+		
+		if (degree == 0) {
+			// Select Optimal Degree
+			this.degree = 97;
 		}
 
 		this.root = new BTreeNode<T>();

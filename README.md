@@ -1,6 +1,7 @@
 Java BTree designed to store DNA sequences.
 
-binary file
+Optimal Degree:
+4096 = 8 + 8 + 4 + (2T - 1)*13 + (2T)*8
 
 [Metadata]
 8xb Degree
@@ -11,8 +12,8 @@ binary file
 8xb Key
 4xb Number of Keys
 1xb # isLeaf
-?xb Nodes
-?xb Child Keys (Byte offsets)
+?xb Keys
+?xb Child Key (Byte offsets)
 
 [Key]
 1xb Sequence Length
