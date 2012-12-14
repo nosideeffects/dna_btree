@@ -1,3 +1,6 @@
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -11,7 +14,11 @@ import java.util.ArrayList;
  */
 public class Sequence implements Comparable<Sequence>, Serializable {
 	private Long seq = 0L;
-	private int length;
+	private int length = 0;
+	
+	public Sequence(){
+		
+	}
 	
 	/**
 	 * Creates a new Sequence with the given
@@ -121,14 +128,7 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 		return r;
 	}
 	
-	/**
-	 * Returns data of Sequence as 9 bytes: <br />
-	 * <code><1B>[sequence length] <8B>[sequence]</code>
-	 * @return
-	 */
-	public byte[] serialize() {
-		return ByteBuffer.allocate(9).put((byte) this.length).putLong(this.seq).array();
-	}
+	
 	
 	public int getSequenceLength() {
 		
@@ -154,4 +154,24 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 		}
 		return -1;
 	}
+	
+	public void writeObject(ObjectOutputStream oos) throws IOException {
+		oos.write((byte) this.length);
+		oos.writeLong(this.seq);
+	}
+	
+	public void readObject(ObjectInputStream ois) throws IOException {
+		this.length = (int) ois.readByte();
+		this.seq = ois.readLong();
+	}
+	
+	/**
+	 * Returns data of Sequence as 9 bytes: <br />
+	 * <code><1B>[sequence length] <8B>[sequence]</code>
+	 * @return
+	 */
+	public byte[] serialize() {
+		return ByteBuffer.allocate(9).put((byte) this.length).putLong(this.seq).array();
+	}
+
 }
