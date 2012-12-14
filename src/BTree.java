@@ -237,6 +237,10 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			this.key = 0;
 		}
 
+		public BTreeNode(Long key) {
+			// TODO Read from disk
+		}
+
 		public TreeObject<T> search(T key) {
 			
 			int i = this.n - 1;
@@ -471,4 +475,24 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			return object;
 		}
 	}
+	
+	/**
+	 * Contains key (byte offset) of a child node.
+	 */
+	private class NodeKey{
+		private Long key;
+		
+		public NodeKey(Long key){
+			this.key = key;
+		}
+		
+		/**
+		 * Loads node from disk.
+		 */
+		public BTreeNode<T> load() {
+			// TODO Auto-generated method stub
+			return new BTreeNode<T>(key);
+		}
+	}
+
 }
