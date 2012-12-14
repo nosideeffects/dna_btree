@@ -15,6 +15,7 @@ import java.util.ArrayList;
 
 public class BTree<T extends Comparable<T> & Serializable> {
 
+	private final String BTreeFileExten = ".btree.data.k.t";
 	private int degree;
 	private BTreeNode<T> root;
 	private final static int NODE_SIZE = 4194304;
