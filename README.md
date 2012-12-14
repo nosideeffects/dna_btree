@@ -4,7 +4,7 @@ Optimal Degree:
 4096 = 8 + 8 + 4 + (2T - 1)*13 + (2T)*8
 
 [Metadata]
-8xb Degree
+4xb Degree
 8xb Root (Byte offset)
 4xb Number of nodes
 

@@ -2,6 +2,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -28,15 +29,10 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	
 	private RandomAccessFile raf;
 
-	public BTree(int degree, String name) {
+	public BTree(int degree, String name) throws IOException {
 
 		this.degree = degree;
-		try {
-			this.raf = new RandomAccessFile(name + EXTENSION, "rw");
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		this.raf = new RandomAccessFile(new File(name + EXTENSION), "rw");
 
 		if (degree < 0) {
 
@@ -49,6 +45,8 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			this.degree = 97;
 		}
 
+		this.raf.writeInt(degree);
+		this.raf.close();
 		this.root = new BTreeNode<T>();
 	}
 
