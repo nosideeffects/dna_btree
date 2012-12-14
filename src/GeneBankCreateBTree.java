@@ -51,12 +51,11 @@ public class GeneBankCreateBTree {
 		try {
 
 			// Create empty BTree
-			BTree<Sequence> btree = new BTree<Sequence>(degree);
+			BTree<Sequence> btree = new BTree<Sequence>(degree,args[1]);
 
 			// Read gbkFile
 			FileInputStream fis = new FileInputStream(gbkFile);
-			DataInputStream dis = new DataInputStream(fis);
-			BufferedReader br = new BufferedReader(new InputStreamReader(dis));
+			BufferedReader br = new BufferedReader(new InputStreamReader(fis));
 			String line = "", extra = "", pattern = "[\\s\\d]";
 			Sequence[] sa;
 			boolean startSequences = false;
@@ -98,7 +97,7 @@ public class GeneBankCreateBTree {
 			// TODO gbkFile added to BTree. Now write to disk.
 			// btree.write();
 
-			dis.close();
+			fis.close();
 			System.out.println(btree.toString());
 		} catch (FileNotFoundException e) {
 

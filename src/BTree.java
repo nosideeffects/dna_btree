@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.RandomAccessFile;
 import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -24,10 +25,18 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	
 	private StringBuffer sb = new StringBuffer();
 	private static ArrayList<byte[]> bytes = new ArrayList<byte[]>();
+	
+	private RandomAccessFile raf;
 
-	public BTree(int degree) {
+	public BTree(int degree, String name) {
 
 		this.degree = degree;
+		try {
+			this.raf = new RandomAccessFile(name + EXTENSION, "rw");
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		if (degree < 0) {
 
@@ -46,6 +55,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	public BTree(String bTreeFile) {
 
 		try {
+			this.raf = new RandomAccessFile(bTreeFile, "rw");
 
 			FileInputStream fis = new FileInputStream(bTreeFile);
 			DataInputStream dis = new DataInputStream(fis);
