@@ -14,8 +14,12 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 	private Long seq = 0L;
 	private int length = 0;
 	
+	/**
+	 * Default constructor
+	 */
 	public Sequence(){
-		
+		this.seq    = 0L;
+		this.length = 0;
 	}
 	
 	/**
@@ -39,6 +43,7 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 		}
 		
 		this.length = sequenceLength;
+		this.seq    = 0L;
 		char c;
 		
 		for (int i = 0, p = str.length() - 1; p >= 0; i++, p--) {
@@ -109,16 +114,16 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 			
 			switch (Integer.parseInt(str.substring(i, i+2))) {
 				case 0:
-					r += "a";
+					r += "A";
 					break;
 				case 1:
-					r += "c";
+					r += "C";
 					break;
 				case 10:
-					r += "g";
+					r += "G";
 					break;
 				case 11:
-					r += "t";
+					r += "T";
 					break;
 			}
 		}

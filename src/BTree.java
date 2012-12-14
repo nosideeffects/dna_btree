@@ -1,18 +1,12 @@
 import java.io.BufferedReader;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
-
-import javax.sound.midi.SysexMessage;
 
 public class BTree<T extends Comparable<T> & Serializable> {
 
@@ -194,8 +188,13 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			this.key = getNewOffset();
 		}
 
-		public BTreeNode(Long key) {
-			// TODO Read from disk
+		public BTreeNode(Long key) throws IOException {
+			this.key = key;
+			
+			this.keys = new Object[degree * 2 - 1];
+			this.children = new Object[degree * 2];
+			
+			this.load();
 		}
 
 		public TreeObject<T> search(T key) {
@@ -321,10 +320,30 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 		/**
 		 * Loads node from disk.
+		 * @throws IOException 
 		 */
-		private void load() {
-			// TODO Auto-generated method stub
+		private void load() throws IOException {
+			raf.seek(key + 8);
+			// Get Number of Nodes
+			this.n = raf.readInt();
+			// Get Node leaf value
+			this.leaf = raf.readBoolean();
 
+			// Get each node
+			for (int i = 0; i < this.n; i++){
+				TreeObject<T> t_obj = new TreeObject<T>();
+				t_obj.readObject(raf);
+				setKey(i,t_obj);
+			}
+			
+			if (!this.isFull()) {
+				int serialLength = getKey(0).serialLength();
+				long pos = raf.getFilePointer();
+				pos += ((2*degree - 1) - this.n) * serialLength;
+			}
+			
+			// Get each child
+			
 		}
 
 		/**
@@ -350,9 +369,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			if (!this.isFull()) {
 				int serialLength = getKey(0).serialLength();
 				long pos = raf.getFilePointer();
-				for (int i = this.n; i < 2*degree - 1; i++){
-					pos += serialLength;
-				}
+				pos += ((2*degree - 1) - this.n) * serialLength;
 				raf.seek(pos);
 			}
 			
@@ -364,17 +381,13 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				
 				if(!this.isFull()){
 					long pos = raf.getFilePointer();
-					for (int i = this.n + 1; i < 2*degree; i++) {
-						pos += 8;
-					}
+					pos += ((2*degree) - (this.n + 1)) * 8;
 					raf.seek(pos-1);
 					raf.write(0);
 				}
 			} else {
 				long pos = raf.getFilePointer();
-				for (int i = 0; i < 2*degree; i++) {
-					pos += 8;
-				}
+				pos += (2*degree) * 8;
 				raf.seek(pos-1);
 				raf.write(0);
 			}
@@ -432,6 +445,11 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		private int frequency;
 		private T key;
 
+		public TreeObject() {
+			this.key = (T) new Object();
+			this.frequency = 0;
+		}
+		
 		public TreeObject(T key) {
 			this.key = key; 
 			this.frequency = 1;
@@ -486,9 +504,9 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		
 		/**
 		 * Loads node from disk.
+		 * @throws IOException 
 		 */
-		public BTreeNode<T> load() {
-			// TODO Auto-generated method stub
+		public BTreeNode<T> load() throws IOException {
 			return new BTreeNode<T>(key);
 		}
 	}
