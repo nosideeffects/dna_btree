@@ -121,9 +121,13 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 		return r;
 	}
 	
+	/**
+	 * Returns data of Sequence as 9 bytes: <br />
+	 * <code><1B>[sequence length] <8B>[sequence]</code>
+	 * @return
+	 */
 	public byte[] serialize() {
-		
-		return ByteBuffer.allocate(8).putLong(this.seq).array();
+		return ByteBuffer.allocate(9).put((byte) this.length).putLong(this.seq).array();
 	}
 	
 	public int getSequenceLength() {

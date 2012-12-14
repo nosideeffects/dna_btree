@@ -7,7 +7,7 @@ public class SequenceTest {
 	public static void main(String[] args) {
 		
 		String str = "acg";
-		//Sequence s = new Sequence(str, 3);
+		Sequence s = new Sequence(str, 3);
 		
 		/* Test string converted to binary correct
 		System.out.println(str);
@@ -26,6 +26,7 @@ public class SequenceTest {
 			System.out.println(Sequence.toSequence(s));
 		}*/
 		
+		System.out.println(s);
 	}
 
 }
