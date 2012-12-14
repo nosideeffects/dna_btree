@@ -1,7 +1,5 @@
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -153,23 +151,26 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 		return -1;
 	}
 	
-	public void writeObject(ObjectOutputStream oos) throws IOException {
-		oos.write((byte) this.length);
-		oos.writeLong(this.seq);
-	}
-	
-	public void readObject(ObjectInputStream ois) throws IOException {
-		this.length = (int) ois.readByte();
-		this.seq = ois.readLong();
-	}
-	
 	/**
-	 * Returns data of Sequence as 9 bytes: <br />
+	 * Read the next 9 bytes from RandomAccessFile: <br />
 	 * <code><1B>[sequence length] <8B>[sequence]</code>
 	 * @return
+	 * @throws IOException 
 	 */
-	public byte[] serialize() {
-		return ByteBuffer.allocate(9).put((byte) this.length).putLong(this.seq).array();
+	public void writeObject(RandomAccessFile raf) throws IOException {
+		raf.write((byte) this.length);
+		raf.writeLong(this.seq);
+	}
+
+	@Override
+	public void readObject(RandomAccessFile raf) throws IOException {
+		this.length = raf.read();
+		this.seq = raf.readLong();
+	}
+
+	@Override
+	public int serialLength() {
+		return 12;
 	}
 
 }

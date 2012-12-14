@@ -8,12 +8,11 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.RandomAccessFile;
-import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+
+import javax.sound.midi.SysexMessage;
 
 public class BTree<T extends Comparable<T> & Serializable> {
 
@@ -33,7 +32,13 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 		this.degree = degree;
 		this.numNodes = 1;
-		this.raf = new RandomAccessFile(new File(name + EXTENSION), "rw");
+		
+		// Ensure BRAND NEW file is created.
+		File btreefile = new File(name + EXTENSION);
+		btreefile.delete();
+		
+		// Allow random access
+		this.raf = new RandomAccessFile(btreefile, "rw");
 
 		if (degree < 0) {
 
@@ -47,7 +52,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		}
 
 		this.raf.writeInt(this.degree);
-		this.raf.skipBytes(8);
+		this.raf.seek(this.raf.length() + 8);
 		this.raf.writeInt(this.numNodes);
 		this.root = new BTreeNode<T>();
 	}
@@ -74,7 +79,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		}
 	}
 
-	public void insert(T key) {
+	public void insert(T key) throws IOException {
 
 		TreeObject<T> t_obj = findKeyObject(key);
 
@@ -145,98 +150,25 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			}
 		}
 	}
-
-	public String toString() {
-		return build();
-	}
-	
-	public void write() throws IOException {
-		
-		byte[] byteArray = new byte[BLOCK_SIZE];
-		
-		int j = 0;
-		for(int i = 0; i < root.keys.length; i++) {
-			
-			if (root.keys[i] != null) {
-				
-				for(byte b: ((TreeObject<T>) root.keys[i]).serialize()) {
-					
-					byteArray[j++] = b;
-				}
-			}
-		}
-		
-		bytes.add(byteArray);
-		
-		for(int i = 0; i < root.children.length; i++) {
-			
-			if (root.children[i] != null) {
-				
-				write((BTreeNode<T>) root.children[i]);
-			}
-		}
-		
-		FileOutputStream fos = new FileOutputStream("treefile");
-		for (byte[] b: bytes) {
-			fos.write(b);
-		}
-		fos.close();
-	}
-	
-	private void write(BTreeNode<T> node) throws IOException {
-		
-		int j = 0;
-		byte[] byteArray = new byte[BLOCK_SIZE];
-		for(int i = 0; i < node.keys.length; i++) {
-			
-			if (node.keys[i] != null) {
-				for(byte b: ((TreeObject<T>) node.keys[i]).serialize()) {
-					
-					byteArray[j++] = b;
-				}
-			}
-		}
-		
-		bytes.add(byteArray);
-
-		for (int i = 0; i < node.children.length; i++) {
-			
-			if (node.children[i] != null) {
-				
-				write((BTreeNode<T>) node.children[i]);
-			}
-		}
-	}
-	
-	private byte[] serialize(Object obj) throws IOException {
-		
-		ByteArrayOutputStream b = new ByteArrayOutputStream();
-		ObjectOutputStream o = new ObjectOutputStream(b);
-		
-		o.writeObject(obj);
-		o.close();
-		
-		return b.toByteArray();
-	}
 	
 	public byte[] read() {
 		
 		return null;
 	}
 	
-	private T deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
-		
-		ByteArrayInputStream b = new ByteArrayInputStream(bytes);
-		ObjectInputStream o = new ObjectInputStream(b);
-		
-		T obj = (T) o.readObject();
-		
-		return obj;
+	public long getNewOffset(){
+		try {
+			return this.raf.length();
+		} catch (IOException e) {
+			e.printStackTrace();
+			System.err.println("Cannot allocate new node!");
+			System.exit(1);
+		}
+		return -1;
 	}
 	
-	public long getNewOffset() {
-		// TODO Auto-generated method stub
-		return 0;
+	public String toString() {
+		return build();
 	}
 
 	@SuppressWarnings("hiding")
@@ -300,7 +232,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			return c;
 		}
 
-		public void splitChild(int index) {
+		public void splitChild(int index) throws IOException {
 			BTreeNode<T> z = new BTreeNode<T>();
 			BTreeNode<T> y = getChild(index);
 
@@ -356,8 +288,9 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		 * 
 		 * @param key
 		 *          key to insert
+		 * @throws IOException 
 		 */
-		public void insert(T key) {
+		public void insert(T key) throws IOException {
 			int i = this.n - 1;
 			if (this.isLeaf()) {
 				while (i >= 0 && (this.getKey(i) != null)
@@ -396,10 +329,55 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 		/**
 		 * Saves node to disk.
+		 * @throws IOException 
 		 */
-		private void save() {
-			// TODO Auto-generated method stub
-
+		private void save() throws IOException {
+			raf.seek(this.key);
+			
+			// Key/offset
+			raf.writeLong(this.key);
+			// Number of keys
+			raf.writeInt(this.n);
+			// If node is leaf
+			raf.writeBoolean(this.leaf);
+			
+			// Write each key
+			for (int i = 0; i < this.n; i++) {
+				getKey(i).writeObject(raf);
+			}
+			
+			// Leave space for unused key indices
+			if (!this.isFull()) {
+				int serialLength = getKey(0).serialLength();
+				long pos = raf.getFilePointer();
+				for (int i = this.n; i < 2*degree - 1; i++){
+					pos += serialLength;
+				}
+				raf.seek(pos);
+			}
+			
+			// Write each child
+			if (!this.leaf) {
+				for (int i = 0; i < this.n + 1; i++) {
+					raf.writeLong(getChild(i).key);
+				}
+				
+				if(!this.isFull()){
+					long pos = raf.getFilePointer();
+					for (int i = this.n + 1; i < 2*degree; i++) {
+						pos += 8;
+					}
+					raf.seek(pos-1);
+					raf.write(0);
+				}
+			} else {
+				long pos = raf.getFilePointer();
+				for (int i = 0; i < 2*degree; i++) {
+					pos += 8;
+				}
+				raf.seek(pos-1);
+				raf.write(0);
+			}
 		}
 
 		/**
@@ -477,37 +455,22 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			return str;
 		}
 		
-		public byte[] serialize() throws IOException {
-			
-			//ByteArrayOutputStream b = new ByteArrayOutputStream();
-			//ObjectOutputStream o = new ObjectOutputStream(b);
-			
-			//o.writeObject(this.key);
-			byte[] frequency = ByteBuffer.allocate(4).putInt(this.frequency).array();
-			byte[] key = ((Sequence) this.key).serialize();
-			
-			byte[] object = new byte[frequency.length + key.length];
-			for (int i = 0; i < frequency.length; i++) {
-				
-				object[i] = frequency[i];
-			}
-			
-			for (int i = 0; i < key.length; i++) {
-				
-				object[i + frequency.length] = key[i];
-			}
-			
-			return object;
+		@Override
+		public void writeObject(RandomAccessFile raf) throws IOException {
+			this.key.writeObject(raf);
+			raf.writeInt(this.frequency);
 		}
-		
-		public void writeObject(ObjectOutputStream oos) throws IOException {
-			oos.writeObject(key);
-			oos.writeInt(frequency);
+
+		@Override
+		public void readObject(RandomAccessFile raf) throws IOException {
+			this.key.readObject(raf);
+			this.frequency = raf.readInt();
 		}
-		
-		public void readObject (ObjectInputStream ois) throws IOException, ClassNotFoundException {
-			key = (T) ois.readObject();
-			frequency = ois.readInt();
+
+		@Override
+		public final int serialLength() {
+			// TODO Auto-generated method stub
+			return this.key.serialLength() + 1;
 		}
 	}
 	
