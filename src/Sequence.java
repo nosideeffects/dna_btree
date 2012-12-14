@@ -1,3 +1,4 @@
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 /**
@@ -117,6 +118,11 @@ public class Sequence implements Comparable<Sequence> {
 		}
 		
 		return r;
+	}
+	
+	public byte[] serialize() {
+		
+		return ByteBuffer.allocate(8).putLong(this.seq).array();
 	}
 	
 	public int getSequenceLength() {

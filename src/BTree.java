@@ -1,15 +1,24 @@
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class BTree<T extends Comparable<T>> {
 
 	private int degree;
 	private BTreeNode<T> root;
+	private final static int NODE_SIZE = 4194304;
 	private StringBuffer sb = new StringBuffer();
+	private static ArrayList<byte[]> bytes = new ArrayList<byte[]>();
 
 	public BTree(int degree) {
 
@@ -119,6 +128,90 @@ public class BTree<T extends Comparable<T>> {
 	public String toString() {
 		build();
 		return sb.toString();
+	}
+	
+	public void write() throws IOException {
+		
+		byte[] byteArray = new byte[NODE_SIZE];
+		
+		int j = 0;
+		for(int i = 0; i < root.keys.length; i++) {
+			
+			if (root.keys[i] != null) {
+				
+				for(byte b: ((TreeObject<T>) root.keys[i]).serialize()) {
+					
+					byteArray[j++] = b;
+				}
+			}
+		}
+		
+		bytes.add(byteArray);
+		
+		for(int i = 0; i < root.children.length; i++) {
+			
+			if (root.children[i] != null) {
+				
+				write((BTreeNode<T>) root.children[i]);
+			}
+		}
+		
+		FileOutputStream fos = new FileOutputStream("treefile");
+		for (byte[] b: bytes) {
+			fos.write(b);
+		}
+		fos.close();
+	}
+	
+	private void write(BTreeNode<T> node) throws IOException {
+		
+		int j = 0;
+		byte[] byteArray = new byte[NODE_SIZE];
+		for(int i = 0; i < node.keys.length; i++) {
+			
+			if (node.keys[i] != null) {
+				for(byte b: ((TreeObject<T>) node.keys[i]).serialize()) {
+					
+					byteArray[j++] = b;
+				}
+			}
+		}
+		
+		bytes.add(byteArray);
+
+		for (int i = 0; i < node.children.length; i++) {
+			
+			if (node.children[i] != null) {
+				
+				write((BTreeNode<T>) node.children[i]);
+			}
+		}
+	}
+	
+	private byte[] serialize(Object obj) throws IOException {
+		
+		ByteArrayOutputStream b = new ByteArrayOutputStream();
+		ObjectOutputStream o = new ObjectOutputStream(b);
+		
+		o.writeObject(obj);
+		o.close();
+		
+		return b.toByteArray();
+	}
+	
+	public byte[] read() {
+		
+		return null;
+	}
+	
+	private T deserialize(byte[] bytes) throws IOException, ClassNotFoundException {
+		
+		ByteArrayInputStream b = new ByteArrayInputStream(bytes);
+		ObjectInputStream o = new ObjectInputStream(b);
+		
+		T obj = (T) o.readObject();
+		
+		return obj;
 	}
 
 	@SuppressWarnings("hiding")
@@ -349,6 +442,29 @@ public class BTree<T extends Comparable<T>> {
 			String str = "";
 			str = key.toString() + " (" + frequency + ")";
 			return str;
+		}
+		
+		public byte[] serialize() throws IOException {
+			
+			//ByteArrayOutputStream b = new ByteArrayOutputStream();
+			//ObjectOutputStream o = new ObjectOutputStream(b);
+			
+			//o.writeObject(this.key);
+			byte[] frequency = ByteBuffer.allocate(4).putInt(this.frequency).array();
+			byte[] key = ((Sequence) this.key).serialize();
+			
+			byte[] object = new byte[frequency.length + key.length];
+			for (int i = 0; i < frequency.length; i++) {
+				
+				object[i] = frequency[i];
+			}
+			
+			for (int i = 0; i < key.length; i++) {
+				
+				object[i + frequency.length] = key[i];
+			}
+			
+			return object;
 		}
 	}
 }
