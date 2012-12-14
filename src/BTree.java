@@ -55,7 +55,6 @@ public class BTree<T extends Comparable<T>> {
 	}
 
 	public void insert(T key) {
-		// TODO: Search for key first, to increment if duplicate
 
 		TreeObject<T> t_obj = findKeyObject(key);
 
@@ -78,7 +77,7 @@ public class BTree<T extends Comparable<T>> {
 	}
 
 	public T search(T key) {
-		// TODO: Search BTree for Key, return if exists, return null otherwise
+		
 		TreeObject<T> t_obj = findKeyObject(key);
 
 		if (t_obj != null) {
@@ -238,7 +237,7 @@ public class BTree<T extends Comparable<T>> {
 		}
 
 		public TreeObject<T> search(T key) {
-			// TODO: Search Node and/or children for node, returning if it exists
+			
 			int i = this.n - 1;
 			while (i >= 0 && key.compareTo(this.getKey(i).getKey()) < 0) {
 				i--;
