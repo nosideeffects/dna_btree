@@ -32,6 +32,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	public BTree(int degree, String name) throws IOException {
 
 		this.degree = degree;
+		this.numNodes = 1;
 		this.raf = new RandomAccessFile(new File(name + EXTENSION), "rw");
 
 		if (degree < 0) {
@@ -45,8 +46,9 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			this.degree = 97;
 		}
 
-		this.raf.writeInt(degree);
-		this.raf.close();
+		this.raf.writeInt(this.degree);
+		this.raf.skipBytes(8);
+		this.raf.writeInt(this.numNodes);
 		this.root = new BTreeNode<T>();
 	}
 
