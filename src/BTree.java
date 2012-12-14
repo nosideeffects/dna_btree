@@ -18,7 +18,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	private final String BTreeFileExten = ".btree.data.k.t";
 	private int degree;
 	private BTreeNode<T> root;
-	private final static int NODE_SIZE = 4194304;
+	private final static int BLOCK_SIZE = 4096;
 	private StringBuffer sb = new StringBuffer();
 	private static ArrayList<byte[]> bytes = new ArrayList<byte[]>();
 
