@@ -9,10 +9,11 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
-public class BTree<T extends Comparable<T>> {
+public class BTree<T extends Comparable<T> & Serializable> {
 
 	private int degree;
 	private BTreeNode<T> root;
@@ -215,7 +216,7 @@ public class BTree<T extends Comparable<T>> {
 	}
 
 	@SuppressWarnings("hiding")
-	private class BTreeNode<T extends Comparable<T>> {
+	private class BTreeNode<T extends Comparable<T> & Serializable> {
 		private boolean leaf;
 		private long key;
 		/**
@@ -419,7 +420,8 @@ public class BTree<T extends Comparable<T>> {
 
 	}
 
-	private class TreeObject<T extends Comparable<T>> {
+	@SuppressWarnings("serial")
+	private class TreeObject<T extends Comparable<T> & Serializable> implements Serializable {
 		private int frequency;
 		private T key;
 

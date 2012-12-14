@@ -1,3 +1,4 @@
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
@@ -8,7 +9,7 @@ import java.util.ArrayList;
  * @author Jacob Biggs
  *
  */
-public class Sequence implements Comparable<Sequence> {
+public class Sequence implements Comparable<Sequence>, Serializable {
 	private Long seq = 0L;
 	private int length;
 	
