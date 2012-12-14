@@ -128,8 +128,6 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 		return r;
 	}
 	
-	
-	
 	public int getSequenceLength() {
 		
 		return length;

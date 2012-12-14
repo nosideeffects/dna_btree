@@ -19,6 +19,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	private final static int BLOCK_SIZE = 4096;
 	
 	private int degree;
+	private int numNodes;
 	private BTreeNode<T> root;
 	
 	private StringBuffer sb = new StringBuffer();
@@ -222,6 +223,11 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		
 		return obj;
 	}
+	
+	public long getNewOffset() {
+		// TODO Auto-generated method stub
+		return 0;
+	}
 
 	@SuppressWarnings("hiding")
 	private class BTreeNode<T extends Comparable<T> & Serializable> {
@@ -235,14 +241,15 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		private Object[] children;
 
 		public BTreeNode() {
+			numNodes += 1;
+			
 			this.leaf = true;
-
 			this.n = 0;
 
 			this.keys = new Object[degree * 2 - 1];
 			this.children = new Object[degree * 2];
 
-			this.key = 0;
+			this.key = getNewOffset();
 		}
 
 		public BTreeNode(Long key) {
@@ -481,6 +488,16 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			}
 			
 			return object;
+		}
+		
+		public void writeObject(ObjectOutputStream oos) throws IOException {
+			oos.writeObject(key);
+			oos.writeInt(frequency);
+		}
+		
+		public void readObject (ObjectInputStream ois) throws IOException, ClassNotFoundException {
+			key = (T) ois.readObject();
+			frequency = ois.readInt();
 		}
 	}
 	
