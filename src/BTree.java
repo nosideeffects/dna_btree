@@ -134,7 +134,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	
 	public void write() throws IOException {
 		
-		byte[] byteArray = new byte[NODE_SIZE];
+		byte[] byteArray = new byte[BLOCK_SIZE];
 		
 		int j = 0;
 		for(int i = 0; i < root.keys.length; i++) {
@@ -168,7 +168,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	private void write(BTreeNode<T> node) throws IOException {
 		
 		int j = 0;
-		byte[] byteArray = new byte[NODE_SIZE];
+		byte[] byteArray = new byte[BLOCK_SIZE];
 		for(int i = 0; i < node.keys.length; i++) {
 			
 			if (node.keys[i] != null) {
