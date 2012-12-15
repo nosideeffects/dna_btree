@@ -31,7 +31,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		btreefile.delete();
 		
 		// Allow random access
-		this.raf = new RandomAccessFile(btreefile, "rw");
+		this.raf = new RandomAccessFile(btreefile, "rwd");
 
 		if (degree < 0) {
 
