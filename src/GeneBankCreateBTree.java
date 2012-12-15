@@ -94,9 +94,6 @@ public class GeneBankCreateBTree {
 				extra = line.substring(line.length() - sequenceLength);
 			}
 
-			// TODO gbkFile added to BTree. Now write to disk.
-			// btree.write();
-
 			fis.close();
 			System.out.println(btree.toString());
 			btree.closeFile();

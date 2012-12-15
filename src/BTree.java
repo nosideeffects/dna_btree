@@ -31,7 +31,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		btreefile.delete();
 		
 		// Allow random access
-		this.raf = new RandomAccessFile(btreefile, "rwd");
+		this.raf = new RandomAccessFile(btreefile, "rw");
 
 		if (degree < 0) {
 
@@ -52,13 +52,12 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 	public BTree(String bTreeFile, Factory<T> factory) throws IOException {
 		this.factory = factory;
-		this.raf = new RandomAccessFile(bTreeFile, "rwd");
+		this.raf = new RandomAccessFile(bTreeFile, "rw");
 		
 		this.degree = raf.readInt();
 		Long rootOffset = raf.readLong();
 		this.numNodes = raf.readInt();
 		
-		System.out.println(rootOffset);
 		this.root = new BTreeNode(rootOffset);
 		root.load();
 	}
@@ -78,7 +77,6 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				
 				raf.seek(4L);
 				raf.writeLong(s.key);
-				System.out.println(s.key);
 
 				s.setChild(0, r);
 				s.splitChild(0);
@@ -107,7 +105,9 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	private String build() throws IOException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(root.toString());
-		sb.append(" (head)\n");
+		sb.append("(head)--");
+		sb.append(root.key);
+		sb.append("\n");
 		build(sb, root, 0, "head", 0, true);
 		return sb.toString();
 	}
@@ -127,7 +127,10 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			sb.append(node.toString());
 			sb.append("(");
 			sb.append(prevLevel);
-			sb.append(".c" + child);
+			sb.append(".c" );
+			sb.append(child);
+			sb.append("--");
+			sb.append(node.key);
 			sb.append(")\n");
 			thisLevel = prevLevel + ".c" + child;
 			first = false;
@@ -148,7 +151,14 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	
 	public long getNewOffset(){
 		try {
-			return this.raf.length();
+			long key = this.raf.length();
+			this.raf.seek(key);
+			this.raf.writeLong(key);
+			int serialLength = (new TreeObject<T>()).serialLength();
+			this.raf.seek(key + 13 + (2*degree -1)*serialLength + (2*degree)*8 - 1);
+			this.raf.write(0);
+			
+			return key;
 		} catch (IOException e) {
 			e.printStackTrace();
 			System.err.println("Cannot allocate new node!");
