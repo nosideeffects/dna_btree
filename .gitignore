@@ -1,6 +1,7 @@
 bin\
 
 *.class
+*.k.t
 
 .project
 .DS_Store
