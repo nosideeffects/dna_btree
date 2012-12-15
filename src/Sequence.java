@@ -175,7 +175,16 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 
 	@Override
 	public int serialLength() {
-		return 12;
+		return 9;
+	}
+	
+	public static class SequenceFactory implements Factory<Sequence> {
+
+		@Override
+		public Sequence newInstance() {
+			return new Sequence();
+		}
+		
 	}
 
 }

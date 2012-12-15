@@ -17,13 +17,12 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	private int numNodes;
 	private BTreeNode<T> root;
 	
-	private StringBuffer sb = new StringBuffer();
-	private static ArrayList<byte[]> bytes = new ArrayList<byte[]>();
-	
+	private Factory<T> factory;
 	private RandomAccessFile raf;
 
-	public BTree(int degree, String name) throws IOException {
+	public BTree(int degree, String name, Factory<T> factory) throws IOException {
 
+		this.factory = factory;
 		this.degree = degree;
 		this.numNodes = 1;
 		
@@ -51,8 +50,10 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		this.root = new BTreeNode<T>();
 	}
 
-	public BTree(String bTreeFile) {
+	public BTree(String bTreeFile, Factory<T> factory) {
 
+		this.factory = factory;
+		
 		try {
 			this.raf = new RandomAccessFile(bTreeFile, "rw");
 
@@ -86,8 +87,9 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				this.root = s;
 				s.isLeaf(false);
 
-				s.setChild(0, r);
-				s.splitChild(0);
+				s.setChild(0, new NodeKey<T>(r.key));
+				s.save();
+				s.splitChild(r,0);
 				s.insert(key);
 			} else {
 				r.insert(key);
@@ -95,7 +97,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		}
 	}
 
-	public T search(T key) {
+	public T search(T key) throws IOException {
 		
 		TreeObject<T> t_obj = findKeyObject(key);
 
@@ -106,11 +108,11 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		return null;
 	}
 
-	private TreeObject<T> findKeyObject(T key) {
+	private TreeObject<T> findKeyObject(T key) throws IOException {
 		return root.search(key);
 	}
 
-	private String build() {
+	private String build() throws IOException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(root.toString());
 		sb.append(" (head)\n");
@@ -118,8 +120,9 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		return sb.toString();
 	}
 
+	@SuppressWarnings("unchecked")
 	private void build(StringBuilder sb, BTreeNode<T> node, int height,
-			String prevLevel, int child, boolean first) {
+			String prevLevel, int child, boolean first) throws IOException {
 		String thisLevel = "";
 		for (int i = 0; i < height; i++) {
 			sb.append("  ");
@@ -139,7 +142,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		int i = 1;
 		for (Object obj : node.children) {
 			if (obj != null) {
-				build(sb, (BTreeNode<T>) obj, height + 1, thisLevel, i, false);
+				build(sb, (BTreeNode<T>) ((NodeKey<T>)obj).load(), height + 1, thisLevel, i, false);
 				i++;
 			}
 		}
@@ -162,17 +165,23 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	}
 	
 	public String toString() {
-		return build();
+		try {
+			return build();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
 	@SuppressWarnings("hiding")
 	private class BTreeNode<T extends Comparable<T> & Serializable> {
 		private boolean leaf;
-		private long key;
+		private long key = 0L;
 		/**
 		 * Number of keys.
 		 */
-		private int n;
+		private int n = 0;
 		private Object[] keys;
 		private Object[] children;
 
@@ -188,8 +197,8 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			this.key = getNewOffset();
 		}
 
-		public BTreeNode(Long key) throws IOException {
-			this.key = key;
+		public BTreeNode(long k) throws IOException {
+			this.key = k;
 			
 			this.keys = new Object[degree * 2 - 1];
 			this.children = new Object[degree * 2];
@@ -197,43 +206,42 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			this.load();
 		}
 
-		public TreeObject<T> search(T key) {
+		public TreeObject<T> search(T key) throws IOException {
 			
-			int i = this.n - 1;
-			while (i >= 0 && key.compareTo(this.getKey(i).getKey()) < 0) {
-				i--;
+			int i = 0;
+			while (i < this.n && key.compareTo(this.getKey(i).getKey()) > 0) {
+				i++;
 			}
 
 			// If the key was found
-			if (i >= 0 && key.compareTo(this.getKey(i).getKey()) == 0) {
+			if (i < this.n && key.compareTo(this.getKey(i).getKey()) == 0) {
 				return this.getKey(i);
 
 				// If there are more children to search
 			} else if (!this.isLeaf()) {
-				return this.getChild(i + 1).search(key);
+				return this.getChild(i).load().search(key);
 			}
 			return null;
 		}
 
-		public void setChild(int index, BTreeNode<T> node) {
-			children[index] = node;
+		public void setChild(int index, NodeKey<T> nodekey) {
+			children[index] = nodekey;
 		}
 
 		@SuppressWarnings("unchecked")
-		public BTreeNode<T> getChild(int index) {
-			return (BTreeNode<T>) children[index];
+		public NodeKey<T> getChild(int index) {
+			return (NodeKey<T>) children[index];
 		}
 
 		@SuppressWarnings("unchecked")
-		public BTreeNode<T> removeChild(int index) {
-			BTreeNode<T> c = (BTreeNode<T>) children[index];
+		public NodeKey<T> removeChild(int index) {
+			NodeKey<T> c = (NodeKey<T>) children[index];
 			children[index] = null;
 			return c;
 		}
 
-		public void splitChild(int index) throws IOException {
+		public void splitChild(BTreeNode<T> y, int index) throws IOException {
 			BTreeNode<T> z = new BTreeNode<T>();
-			BTreeNode<T> y = getChild(index);
 
 			z.isLeaf(y.isLeaf());
 			z.n(degree - 1);
@@ -253,7 +261,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			for (int j = this.n; j >= index + 1; j--) {
 				this.setChild(j + 1, this.removeChild(j));
 			}
-			this.setChild(index + 1, z);
+			this.setChild(index + 1, new NodeKey<T>(z.key));
 
 			for (int j = this.n() - 1; j >= index; j--) {
 				this.setKey(j + 1, this.removeKey(j));
@@ -307,14 +315,14 @@ public class BTree<T extends Comparable<T> & Serializable> {
 					i--;
 				}
 				i++;
-				this.getChild(i).load();
-				if (this.getChild(i).isFull()) {
-					this.splitChild(i);
+				BTreeNode<T> c_i = this.getChild(i).load();
+				if (c_i.isFull()) {
+					this.splitChild(c_i, i);
 					if (key.compareTo(this.getKey(i).getKey()) > 0) {
-						i++;
+						c_i = this.getChild(i+1).load();
 					}
 				}
-				this.getChild(i).insert(key);
+				c_i.insert(key);
 			}
 		}
 
@@ -323,8 +331,8 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		 * @throws IOException 
 		 */
 		private void load() throws IOException {
-			raf.seek(key + 8);
-			// Get Number of Nodes
+			raf.seek(key);
+			this.key = raf.readLong();
 			this.n = raf.readInt();
 			// Get Node leaf value
 			this.leaf = raf.readBoolean();
@@ -337,13 +345,18 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			}
 			
 			if (!this.isFull()) {
-				int serialLength = getKey(0).serialLength();
+				int serialLength = factory.newInstance().serialLength();
 				long pos = raf.getFilePointer();
 				pos += ((2*degree - 1) - this.n) * serialLength;
+				raf.seek(pos);
 			}
 			
 			// Get each child
-			
+			if (!this.leaf) {
+				for (int i = 0; i < this.n + 1; i++) {
+					this.children[i] = new NodeKey<T>(raf.readLong()); 
+				}
+			}
 		}
 
 		/**
@@ -367,7 +380,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			
 			// Leave space for unused key indices
 			if (!this.isFull()) {
-				int serialLength = getKey(0).serialLength();
+				int serialLength = factory.newInstance().serialLength();
 				long pos = raf.getFilePointer();
 				pos += ((2*degree - 1) - this.n) * serialLength;
 				raf.seek(pos);
@@ -446,7 +459,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		private T key;
 
 		public TreeObject() {
-			this.key = (T) new Object();
+			this.key = (T) factory.newInstance();
 			this.frequency = 0;
 		}
 		
@@ -488,17 +501,17 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		@Override
 		public final int serialLength() {
 			// TODO Auto-generated method stub
-			return this.key.serialLength() + 1;
+			return this.key.serialLength() + 4;
 		}
 	}
 	
 	/**
 	 * Contains key (byte offset) of a child node.
 	 */
-	private class NodeKey{
-		private Long key;
+	private class NodeKey<T extends Comparable<T> & Serializable>{
+		private long key;
 		
-		public NodeKey(Long key){
+		public NodeKey(long key){
 			this.key = key;
 		}
 		
@@ -507,7 +520,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		 * @throws IOException 
 		 */
 		public BTreeNode<T> load() throws IOException {
-			return new BTreeNode<T>(key);
+			return new BTreeNode<T>(this.key);
 		}
 	}
 
