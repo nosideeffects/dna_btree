@@ -1,3 +1,5 @@
+import java.io.IOException;
+
 
 public class SequenceTest {
 
@@ -6,27 +8,18 @@ public class SequenceTest {
 	 */
 	public static void main(String[] args) {
 		
-		String str = "acg";
-		Sequence s = new Sequence(str, 3);
+		String str = "test0.gbk.btree.data.k.t";
 		
-		/* Test string converted to binary correct
-		System.out.println(str);
-		System.out.println(s.val());
-		System.out.println(Long.toBinaryString(s.val()));
-		System.out.println(Long.toBinaryString(s.val()).length());
-		*/
-		
-		/* Test parseSequences
-		Sequence[] sa = Sequence.parseSequences(str, 3);
-		System.out.println("\nhere");
-		for (Sequence s: sa) {
+		try {
+			BTree<Sequence> btree = new BTree<Sequence>(str ,new Sequence.SequenceFactory());
 			
-			System.out.println(s.val());
-			System.out.println(Long.toBinaryString(s.val()));
-			System.out.println(Sequence.toSequence(s));
-		}*/
+			System.out.println(btree.toString());
+			btree.closeFile();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
-		System.out.println(s);
 	}
 
 }

@@ -30,16 +30,9 @@ public class GeneBankSearch {
 		
 		// Read bTreeFile, create BTree
 		try {
-			FileInputStream fis = new FileInputStream(bTreeFile);
-			DataInputStream dis = new DataInputStream(fis);
-			BufferedReader br = new BufferedReader(new InputStreamReader(dis));
-			
-			//@TODO Do something
-			/*
-			btree = new BTree(btreeFile);
-			*/
-			
-			dis.close();
+
+			btree = new BTree<Sequence>(bTreeFile, new Sequence.SequenceFactory());
+	
 		} catch (FileNotFoundException e) {
 			
 			System.err.println("BTree file not found. Please check your filename and make sure the BTree file is in the 'data' folder.");

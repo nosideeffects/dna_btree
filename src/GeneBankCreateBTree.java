@@ -99,6 +99,7 @@ public class GeneBankCreateBTree {
 
 			fis.close();
 			System.out.println(btree.toString());
+			btree.closeFile();
 		} catch (FileNotFoundException e) {
 
 			System.err

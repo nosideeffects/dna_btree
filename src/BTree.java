@@ -50,28 +50,17 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		this.root = new BTreeNode<T>();
 	}
 
-	public BTree(String bTreeFile, Factory<T> factory) {
-
+	public BTree(String bTreeFile, Factory<T> factory) throws IOException {
 		this.factory = factory;
+		this.raf = new RandomAccessFile(bTreeFile, "rwd");
 		
-		try {
-			this.raf = new RandomAccessFile(bTreeFile, "rw");
-
-			FileInputStream fis = new FileInputStream(bTreeFile);
-			DataInputStream dis = new DataInputStream(fis);
-			BufferedReader br = new BufferedReader(new InputStreamReader(dis));
-
-			// @TODO Do something
-			/*
-			
-			*/
-
-			dis.close();
-		} catch (FileNotFoundException e) {
-
-		} catch (IOException e) {
-
-		}
+		this.degree = raf.readInt();
+		Long rootOffset = raf.readLong();
+		this.numNodes = raf.readInt();
+		
+		System.out.println(rootOffset);
+		this.root = new BTreeNode(rootOffset);
+		root.load();
 	}
 
 	public void insert(T key) throws IOException {
@@ -86,6 +75,10 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				BTreeNode<T> s = new BTreeNode<T>();
 				this.root = s;
 				s.isLeaf(false);
+				
+				raf.seek(4L);
+				raf.writeLong(s.key);
+				System.out.println(s.key);
 
 				s.setChild(0, r);
 				s.splitChild(0);
@@ -111,7 +104,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		return root.search(key);
 	}
 
-	private String build() {
+	private String build() throws IOException {
 		StringBuilder sb = new StringBuilder();
 		sb.append(root.toString());
 		sb.append(" (head)\n");
@@ -121,12 +114,15 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 	@SuppressWarnings("unchecked")
 	private void build(StringBuilder sb, BTreeNode<T> node, int height,
-			String prevLevel, int child, boolean first) {
+			String prevLevel, int child, boolean first) throws IOException {
+		
+		
 		String thisLevel = "";
 		for (int i = 0; i < height; i++) {
 			sb.append("  ");
 		}
 		if (!first) {
+			node.load();
 			sb.append("--> ");
 			sb.append(node.toString());
 			sb.append("(");
@@ -139,17 +135,15 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			thisLevel = prevLevel;
 		}
 		int i = 1;
-		for (Object obj : node.children) {
-			if (obj != null) {
-				build(sb, (BTreeNode<T>) obj, height + 1, thisLevel, i, false);
-				i++;
+		if (!node.isLeaf()) {
+			for (int j = 0; j < node.n + 1; j++) {
+				BTreeNode<T> obj = node.getChild(j);
+				if (obj != null) {
+					build(sb, obj, height + 1, thisLevel, i, false);
+					i++;
+				}
 			}
 		}
-	}
-	
-	public byte[] read() {
-		
-		return null;
 	}
 	
 	public long getNewOffset(){
@@ -164,7 +158,18 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	}
 	
 	public String toString() {
-		return build();
+		try {
+			return build();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	public void closeFile() throws IOException {
+		root.save();
+		raf.close();
 	}
 
 	@SuppressWarnings("hiding")
@@ -326,34 +331,39 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		 * @throws IOException 
 		 */
 		private void load() throws IOException {
-			raf.seek(key);
-			this.key = raf.readLong();
-			this.n = raf.readInt();
-			// Get Node leaf value
-			this.leaf = raf.readBoolean();
-
-			// Get each node
-			for (int i = 0; i < this.n; i++){
-				TreeObject<T> t_obj = new TreeObject<T>();
-				t_obj.readObject(raf);
-				setKey(i,t_obj);
-			}
-			
-			if (!this.isFull()) {
-				int serialLength = factory.newInstance().serialLength();
-				long pos = raf.getFilePointer();
-				pos += ((2*degree - 1) - this.n) * serialLength;
-				raf.seek(pos);
-			}
-			
-			// Get each child
-			if (!this.leaf) {
-				for (int i = 0; i < this.n + 1; i++) {
-					this.children[i] = new BTreeNode<T>(raf.readLong()); 
+			if (!this.loaded) {
+				this.keys = new Object[degree*2 - 1];
+				this.children = new Object[degree*2];
+				
+				raf.seek(key);
+				this.key = raf.readLong();
+				this.n = raf.readInt();
+				// Get Node leaf value
+				this.leaf = raf.readBoolean();
+	
+				// Get each node
+				for (int i = 0; i < this.n; i++){
+					TreeObject<T> t_obj = new TreeObject<T>();
+					t_obj.readObject(raf);
+					setKey(i,t_obj);
 				}
+				
+				if (!this.isFull()) {
+					int serialLength = factory.newInstance().serialLength();
+					long pos = raf.getFilePointer();
+					pos += ((2*degree - 1) - this.n) * serialLength;
+					raf.seek(pos);
+				}
+				
+				// Get each child
+				if (!this.leaf) {
+					for (int i = 0; i < this.n + 1; i++) {
+						this.children[i] = new BTreeNode<T>(raf.readLong()); 
+					}
+				}
+				
+				this.loaded = true;
 			}
-			
-			this.loaded = true;
 		}
 
 		/**
