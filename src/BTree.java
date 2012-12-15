@@ -1,12 +1,9 @@
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.util.ArrayList;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.file.StandardOpenOption;
 
 public class BTree<T extends Comparable<T> & Serializable> {
 
@@ -14,24 +11,25 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	private final static int BLOCK_SIZE = 4096;
 	
 	private int degree;
-	private int numNodes = 1;
+	private int nodeSize;
+	private int numNodes;
 	private BTreeNode<T> root;
 	
 	private Factory<T> factory;
-	private RandomAccessFile raf;
+	private FileChannel fc;
 
 	public BTree(int degree, String name, Factory<T> factory) throws IOException {
 
 		this.factory = factory;
 		this.degree = degree;
-		this.numNodes = 1;
+		this.numNodes = 0;
 		
 		// Ensure BRAND NEW file is created.
 		File btreefile = new File(name + EXTENSION);
 		btreefile.delete();
 		
 		// Allow random access
-		this.raf = new RandomAccessFile(btreefile, "rw");
+		this.fc = (new RandomAccessFile(btreefile,"rw")).getChannel();
 
 		if (degree < 0) {
 
@@ -43,23 +41,43 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			// Select Optimal Degree
 			this.degree = 97;
 		}
+		
+		this.nodeSize = getNodeByteLength();
+		ByteBuffer bb = ByteBuffer.allocate(16);
+		bb.clear();
 
-		this.raf.writeInt(this.degree);
-		this.raf.seek(this.raf.length() + 8);
-		this.raf.writeInt(this.numNodes);
+		bb.putInt(this.degree);
+		bb.putLong(16);
+		bb.putInt(this.numNodes);
+		
+		bb.flip();
+		
+		this.fc.write(bb);
 		this.root = new BTreeNode<T>();
 	}
 
 	public BTree(String bTreeFile, Factory<T> factory) throws IOException {
 		this.factory = factory;
-		this.raf = new RandomAccessFile(bTreeFile, "rw");
+		File file = new File(bTreeFile);
+		this.fc = (new RandomAccessFile(file, "rw")).getChannel();
 		
-		this.degree = raf.readInt();
-		Long rootOffset = raf.readLong();
-		this.numNodes = raf.readInt();
+		ByteBuffer bb = ByteBuffer.allocate(16);
+		bb.clear();
+		this.fc.read(bb, 0);
+		bb.flip();
 		
+		this.degree = bb.getInt();
+		Long rootOffset = bb.getLong();
+		this.numNodes = bb.getInt();
+		
+		this.nodeSize = getNodeByteLength();
 		this.root = new BTreeNode(rootOffset);
 		root.load();
+	}
+	
+	private int getNodeByteLength(){
+		TreeObject<T> obj = new TreeObject<T>();
+		return 13 + (degree*2 - 1)*obj.serialLength() + (degree*2)*8;
 	}
 
 	public void insert(T key) throws IOException {
@@ -74,12 +92,8 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				BTreeNode<T> s = new BTreeNode<T>();
 				this.root = s;
 				s.isLeaf(false);
-				
-				raf.seek(4L);
-				raf.writeLong(s.key);
 
 				s.setChild(0, r);
-				s.splitChild(0);
 				s.insert(key);
 			} else {
 				r.insert(key);
@@ -150,21 +164,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	}
 	
 	public long getNewOffset(){
-		try {
-			long key = this.raf.length();
-			this.raf.seek(key);
-			this.raf.writeLong(key);
-			int serialLength = (new TreeObject<T>()).serialLength();
-			this.raf.seek(key + 13 + (2*degree -1)*serialLength + (2*degree)*8 - 1);
-			this.raf.write(0);
-			
-			return key;
-		} catch (IOException e) {
-			e.printStackTrace();
-			System.err.println("Cannot allocate new node!");
-			System.exit(1);
-		}
-		return -1;
+		return 16 + nodeSize*numNodes;
 	}
 	
 	public String toString() {
@@ -179,7 +179,13 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	
 	public void closeFile() throws IOException {
 		root.save();
-		raf.close();
+		ByteBuffer bb = ByteBuffer.allocate(8);
+		bb.clear();
+		bb.putLong(root.key);
+		bb.flip();
+		this.fc.write(bb, 4);
+		System.out.println(this.fc.size());
+		this.fc.close();
 	}
 
 	@SuppressWarnings("hiding")
@@ -195,6 +201,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		private Object[] children;
 
 		public BTreeNode() {
+			this.key = getNewOffset();
 			numNodes += 1;
 			
 			this.leaf = true;
@@ -203,8 +210,6 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 			this.keys = new Object[degree * 2 - 1];
 			this.children = new Object[degree * 2];
-
-			this.key = getNewOffset();
 		}
 
 		public BTreeNode(long k) throws IOException {
@@ -345,30 +350,27 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				this.keys = new Object[degree*2 - 1];
 				this.children = new Object[degree*2];
 				
-				raf.seek(key);
-				this.key = raf.readLong();
-				this.n = raf.readInt();
+				ByteBuffer bb = ByteBuffer.allocate(nodeSize);
+				bb.clear();
+				fc.read(bb, this.key);
+				bb.flip();
+				
+				this.key = bb.getLong();
+				this.n = bb.getInt();
 				// Get Node leaf value
-				this.leaf = raf.readBoolean();
+				this.leaf = (bb.get()==0)?false:true;
 	
 				// Get each node
 				for (int i = 0; i < this.n; i++){
 					TreeObject<T> t_obj = new TreeObject<T>();
-					t_obj.readObject(raf);
+					t_obj.readObject(bb);
 					setKey(i,t_obj);
-				}
-				
-				if (!this.isFull()) {
-					int serialLength = factory.newInstance().serialLength();
-					long pos = raf.getFilePointer();
-					pos += ((2*degree - 1) - this.n) * serialLength;
-					raf.seek(pos);
 				}
 				
 				// Get each child
 				if (!this.leaf) {
 					for (int i = 0; i < this.n + 1; i++) {
-						this.children[i] = new BTreeNode<T>(raf.readLong()); 
+						this.children[i] = new BTreeNode<T>(bb.getLong()); 
 					}
 				}
 				
@@ -390,41 +392,30 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		 * @throws IOException 
 		 */
 		private void save() throws IOException {
-			raf.seek(this.key);
+			ByteBuffer bb = ByteBuffer.allocate(nodeSize);
+			bb.clear();
+			int num = nodeSize;
 			
 			// Key/offset
-			raf.writeLong(this.key);
+			bb.putLong(this.key);
 			// Number of keys
-			raf.writeInt(this.n);
+			bb.putInt(this.n);
 			// If node is leaf
-			raf.writeBoolean(this.leaf);
+			bb.put((byte) ((this.leaf)?1:0));
 			
 			// Write each key
 			for (int i = 0; i < this.n; i++) {
-				getKey(i).writeObject(raf);
-			}
-			
-			// Leave space for unused key indices
-			if (!this.isFull()) {
-				int serialLength = factory.newInstance().serialLength();
-				long pos = raf.getFilePointer();
-				pos += ((2*degree - 1) - this.n) * serialLength;
-				raf.seek(pos);
+				getKey(i).writeObject(bb);
 			}
 			
 			// Write each child
 			if (!this.leaf) {
 				for (int i = 0; i < this.n + 1; i++) {
-					raf.writeLong(getChild(i).key);
-				}
-				
-				if(!this.isFull()){
-					long pos = raf.getFilePointer();
-					pos += ((2*degree) - (this.n + 1)) * 8;
-					raf.seek(pos-1);
-					raf.write(0);
+					bb.putLong(getChild(i).key);
 				}
 			}
+			bb.flip();
+			fc.write(bb,this.key);
 		}
 
 		/**
@@ -509,15 +500,15 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		}
 		
 		@Override
-		public void writeObject(RandomAccessFile raf) throws IOException {
-			this.key.writeObject(raf);
-			raf.writeInt(this.frequency);
+		public void writeObject(ByteBuffer bb) throws IOException {
+			this.key.writeObject(bb);
+			bb.putInt(this.frequency);
 		}
 
 		@Override
-		public void readObject(RandomAccessFile raf) throws IOException {
-			this.key.readObject(raf);
-			this.frequency = raf.readInt();
+		public void readObject(ByteBuffer bb) throws IOException {
+			this.key.readObject(bb);
+			this.frequency = bb.getInt();
 		}
 
 		@Override

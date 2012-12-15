@@ -156,18 +156,12 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 		return -1;
 	}
 	
-	/**
-	 * Read the next 9 bytes from RandomAccessFile: <br />
-	 * <code><1B>[sequence length] <8B>[sequence]</code>
-	 * @return
-	 * @throws IOException 
-	 */
+	
 	public void writeObject(RandomAccessFile raf) throws IOException {
 		raf.write((byte) this.length);
 		raf.writeLong(this.seq);
 	}
 
-	@Override
 	public void readObject(RandomAccessFile raf) throws IOException {
 		this.length = raf.read();
 		this.seq = raf.readLong();
@@ -176,6 +170,24 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 	@Override
 	public int serialLength() {
 		return 9;
+	}
+	
+	@Override
+	public void writeObject(ByteBuffer bb) throws IOException {
+		bb.put((byte) this.length);
+		bb.putLong(this.seq);
+	}
+
+	/**
+	 * Read the next 9 bytes: <br />
+	 * <code><1B>[sequence length] <8B>[sequence]</code>
+	 * @return
+	 * @throws IOException 
+	 */
+	@Override
+	public void readObject(ByteBuffer bb) throws IOException {
+		this.length = bb.get();
+		this.seq = bb.getLong();
 	}
 	
 	public static class SequenceFactory implements Factory<Sequence> {

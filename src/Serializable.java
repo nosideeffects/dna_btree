@@ -1,10 +1,10 @@
 import java.io.IOException;
-import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 
 
 public interface Serializable {
-	public void writeObject(RandomAccessFile raf) throws IOException;
-	public void readObject(RandomAccessFile raf) throws IOException;
+	public void writeObject(ByteBuffer bb) throws IOException;
+	public void readObject(ByteBuffer bb) throws IOException;
 	
 	/**
 	 * Returns length in bytes of serialized object.
