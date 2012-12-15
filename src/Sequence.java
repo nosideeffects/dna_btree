@@ -184,6 +184,12 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 		public Sequence newInstance() {
 			return new Sequence();
 		}
+
+		@Override
+		public Sequence[] newArray(int size) {
+			// TODO Auto-generated method stub
+			return new Sequence[size];
+		}
 		
 	}
 

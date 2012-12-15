@@ -375,6 +375,15 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				this.loaded = true;
 			}
 		}
+		
+		private void unload() {
+			if (this.loaded) {
+				this.keys = null;
+				this.children = null;
+				
+				this.loaded = false;
+			}
+		}
 
 		/**
 		 * Saves node to disk.
@@ -415,11 +424,6 @@ public class BTree<T extends Comparable<T> & Serializable> {
 					raf.seek(pos-1);
 					raf.write(0);
 				}
-			} else {
-				long pos = raf.getFilePointer();
-				pos += (2*degree) * 8;
-				raf.seek(pos-1);
-				raf.write(0);
 			}
 		}
 
@@ -475,6 +479,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		private int frequency;
 		private T key;
 
+		@SuppressWarnings("unchecked")
 		public TreeObject() {
 			this.key = (T) factory.newInstance();
 			this.frequency = 0;
