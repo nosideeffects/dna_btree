@@ -184,7 +184,6 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		bb.putLong(root.key);
 		bb.flip();
 		this.fc.write(bb, 4);
-		System.out.println(this.fc.size());
 		this.fc.close();
 	}
 
