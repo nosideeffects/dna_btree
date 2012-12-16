@@ -2,6 +2,7 @@ bin\
 
 *.class
 *.k.t
+*.btree.data.*
 
 .project
 .DS_Store
