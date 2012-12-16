@@ -6,7 +6,7 @@ import java.nio.channels.FileChannel;
 
 public class BTree<T extends Comparable<T> & Serializable> {
 
-	private final static String EXTENSION = ".btree.data.k.t";
+	private final static String EXTENSION = ".btree.data.";
 	private final static int BLOCK_SIZE = 4096;
 	
 	private int degree;
@@ -17,14 +17,14 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	private Factory<T> factory;
 	private FileChannel fc;
 
-	public BTree(int degree, String name, Factory<T> factory) throws IOException {
+	public BTree(int degree, String name, int sequenceLength, Factory<T> factory) throws IOException {
 
 		this.factory = factory;
 		this.degree = degree;
 		this.numNodes = 0;
 		
 		// Ensure BRAND NEW file is created.
-		File btreefile = new File(name + EXTENSION);
+		File btreefile = new File(name + EXTENSION + sequenceLength + "." + this.degree);
 		btreefile.delete();
 		
 		// Allow random access
@@ -100,12 +100,12 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		}
 	}
 
-	public T search(T key) throws IOException {
+	public String search(T key) throws IOException {
 		
 		TreeObject<T> t_obj = findKeyObject(key);
 
 		if (t_obj != null) {
-			return t_obj.getKey();
+			return t_obj.getKey() + ": " + t_obj.frequency();
 		}
 
 		return null;

@@ -51,7 +51,7 @@ public class GeneBankCreateBTree {
 		try {
 
 			// Create empty BTree
-			BTree<Sequence> btree = new BTree<Sequence>(degree,args[1],new Sequence.SequenceFactory());
+			BTree<Sequence> btree = new BTree<Sequence>(degree,args[1],sequenceLength,new Sequence.SequenceFactory());
 
 			// Read gbkFile
 			FileInputStream fis = new FileInputStream(gbkFile);
