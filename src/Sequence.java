@@ -81,20 +81,17 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 	public static Sequence[] parseSequences(String str, int sequenceLength){
 		// 'str' must be void of any whitespace and numbers
 		ArrayList<Sequence> al = new ArrayList<Sequence>();
+		String[] substrings = str.split("[n]+");
 		String s = "";
 		
-		for (int i = 0; i < str.length() - sequenceLength + 1; i++) {
-			
-			s = str.substring(i, i + sequenceLength);
-			
-			if (s.contains("n")) {
+		for (String sub_str : substrings) {
+			int l = sub_str.length();
+			for (int i = 0; i < l - sequenceLength + 1; i++) {
 				
-				i += sequenceLength;
-				continue;
+				s = sub_str.substring(i, i + sequenceLength);
+				
+				al.add(new Sequence(s, sequenceLength));
 			}
-			System.out.println(s);
-			
-			al.add(new Sequence(s, sequenceLength));
 		}
 		
 		return al.toArray(new Sequence[al.size()]);
