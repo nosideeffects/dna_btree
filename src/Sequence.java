@@ -89,10 +89,10 @@ public class Sequence implements Comparable<Sequence>, Serializable {
 			
 			if (s.contains("n")) {
 				
-				i += s.indexOf('n');
+				i += sequenceLength;
 				continue;
 			}
-			// System.out.println(s);
+			System.out.println(s);
 			
 			al.add(new Sequence(s, sequenceLength));
 		}

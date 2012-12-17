@@ -8,7 +8,7 @@ public class SequenceTest {
 	 */
 	public static void main(String[] args) {
 		
-		String str = "test0.gbk.btree.data.k.t";
+		String str = "test3.gbk.btree.data.7.97";
 		
 		try {
 			BTree<Sequence> btree = new BTree<Sequence>(str ,new Sequence.SequenceFactory());
