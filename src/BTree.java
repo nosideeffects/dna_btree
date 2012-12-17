@@ -22,13 +22,6 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		this.factory = factory;
 		this.degree = degree;
 		this.numNodes = 0;
-		
-		// Ensure BRAND NEW file is created.
-		File btreefile = new File(name + EXTENSION + sequenceLength + "." + this.degree);
-		btreefile.delete();
-		
-		// Allow random access
-		this.fc = (new RandomAccessFile(btreefile,"rw")).getChannel();
 
 		if (degree < 0) {
 
@@ -40,6 +33,13 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			// Select Optimal Degree
 			this.degree = 97;
 		}
+		
+		// Ensure BRAND NEW file is created.
+		File btreefile = new File(name + EXTENSION + sequenceLength + "." + this.degree);
+		btreefile.delete();
+		
+		// Allow random access
+		this.fc = (new RandomAccessFile(btreefile,"rw")).getChannel();
 		
 		this.nodeSize = getNodeByteLength();
 		ByteBuffer bb = ByteBuffer.allocate(16);
@@ -105,10 +105,10 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		TreeObject<T> t_obj = findKeyObject(key);
 
 		if (t_obj != null) {
-			return t_obj.getKey() + ": " + t_obj.frequency();
+			return key.toString() + ": " + t_obj.frequency();
 		}
 
-		return null;
+		return key.toString() + ": 0";
 	}
 
 	private TreeObject<T> findKeyObject(T key) throws IOException {
@@ -218,7 +218,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			this.children = null;
 		}
 
-		public TreeObject<T> search(T key) {
+		public TreeObject<T> search(T key) throws IOException {
 
 			int i = this.n - 1;
 			while (i >= 0 && key.compareTo(this.getKey(i).getKey()) < 0) {
@@ -231,6 +231,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 				// If there are more children to search
 			} else if (!this.isLeaf()) {
+				this.getChild(i + 1).load();
 				return this.getChild(i + 1).search(key);
 			}
 			return null;
