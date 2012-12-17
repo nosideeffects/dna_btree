@@ -80,23 +80,17 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	}
 
 	public void insert(T key) throws IOException {
+		BTreeNode<T> r = root;
+		if (r.isFull()) {
+			BTreeNode<T> s = new BTreeNode<T>();
+			this.root = s;
+			s.isLeaf(false);
 
-		TreeObject<T> t_obj = findKeyObject(key);
-
-		if (t_obj != null) {
-			t_obj.incrementFrequency();
+			s.setChild(0, r);
+			s.splitChild(0);
+			s.insert(key);
 		} else {
-			BTreeNode<T> r = root;
-			if (r.isFull()) {
-				BTreeNode<T> s = new BTreeNode<T>();
-				this.root = s;
-				s.isLeaf(false);
-
-				s.setChild(0, r);
-				s.insert(key);
-			} else {
-				r.insert(key);
-			}
+			r.insert(key);
 		}
 	}
 
@@ -291,6 +285,16 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		public void setKey(int index, TreeObject<T> obj) {
 			keys[index] = obj;
 		}
+		
+		public boolean hasKey(T key){
+			for (int i = n - 1; i >= 0; i--) {
+				if (key.compareTo(this.getKey(i).getKey()) == 0){
+					return true;
+				}
+			}
+			
+			return false;
+		}
 
 		@SuppressWarnings("unchecked")
 		public TreeObject<T> getKey(int index) {
@@ -316,21 +320,36 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			if (this.isLeaf()) {
 				while (i >= 0 && (this.getKey(i) != null)
 						&& key.compareTo(this.getKey(i).getKey()) < 0) {
-					this.setKey(i + 1, this.removeKey(i));
 					i--;
 				}
-
-				this.setKey(i + 1, new TreeObject<T>(key));
-				this.n += 1;
-
+				
+				if (i >= 0 && key.compareTo(this.getKey(i).getKey()) == 0) {
+					this.getKey(i).incrementFrequency();
+				} else {
+					for (int j = n - 1; j > i; j--) {
+						this.setKey(j + 1, this.removeKey(j));
+					}
+					this.setKey(i + 1, new TreeObject<T>(key));
+					this.n += 1;
+				}
+				
 				this.save();
 			} else {
 				while (i >= 0 && key.compareTo(this.getKey(i).getKey()) < 0) {
 					i--;
 				}
+				
+				if (i >= 0 && key.compareTo(this.getKey(i).getKey()) == 0) {
+					this.getKey(i).incrementFrequency();
+					this.save();
+					return;
+				}
+				
 				i++;
+				
+				
 				//this.getChild(i).load();
-				if (this.getChild(i).isFull()) {
+				if (!this.getChild(i).hasKey(key) && this.getChild(i).isFull()) {
 					this.splitChild(i);
 					if (key.compareTo(this.getKey(i).getKey()) > 0) {
 						i++;
