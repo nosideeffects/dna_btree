@@ -1,3 +1,4 @@
+import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
@@ -103,4 +104,8 @@ public class Cache<T> {
 		return this.cacheHit;
 	}
 
+	
+	public Iterator<T> iterator() {
+		return this.list.iterator();
+	}
 }

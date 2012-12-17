@@ -8,30 +8,31 @@ public class GeneBankSearch {
 		BTree btree = null;
 		String bTreeFile = "", queryFile = "";
 		ArrayList<Sequence> queries = new ArrayList<Sequence>();
-		int debugLevel = 0, sequenceLength = 0;
+		int debugLevel = 0, sequenceLength = 0, cacheSize = 0;
 		
 		// Get parameters
 		try {
 			
 			bTreeFile = args[0];
 			queryFile = args[1];
+			cacheSize = Integer.parseInt(args[2]);
 			
 			// If exists, set debug level
-			if (args.length > 2) {
+			if (args.length > 3) {
 				
-				debugLevel = Integer.parseInt(args[2]);
+				debugLevel = Integer.parseInt(args[3]);
 			}
 		}
 		catch(IndexOutOfBoundsException e) {
 			
-			System.err.println("Improper command format: GeneBankSearch <btree file> <query file> [<debug level>]");
+			System.err.println("Improper command format: GeneBankSearch <btree file> <query file> <cache size> [<debug level>]");
 			System.exit(1);
 		}
 		
 		// Read bTreeFile, create BTree
 		try {
 
-			btree = new BTree<Sequence>(bTreeFile, new Sequence.SequenceFactory());
+			btree = new BTree<Sequence>(bTreeFile, new Sequence.SequenceFactory(), cacheSize);
 	
 		} catch (FileNotFoundException e) {
 			
@@ -71,6 +72,11 @@ public class GeneBankSearch {
 			
 			for (String result: results) {
 			
+				if (result.equals("")) {
+					
+					continue;
+				}
+				
 				System.out.println(result);
 			}
 			

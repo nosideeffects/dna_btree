@@ -19,7 +19,7 @@ public class GeneBankCreateBTree {
 
 	public static void main(String[] args) {
 
-		int degree = 0, debugLevel = 0, sequenceLength = 0;
+		int degree = 0, debugLevel = 0, sequenceLength = 0, cacheSize = 0;
 		String gbkFile = "";
 
 		// Get parameters
@@ -28,6 +28,7 @@ public class GeneBankCreateBTree {
 			degree = Integer.parseInt(args[0]);
 			gbkFile = "data/" + args[1];
 			sequenceLength = Integer.parseInt(args[2]);
+			cacheSize = Integer.parseInt(args[3]);
 
 			if (sequenceLength < 1 || sequenceLength > 31) {
 
@@ -37,13 +38,13 @@ public class GeneBankCreateBTree {
 			}
 
 			// If exists, set debug level
-			if (args.length > 3) {
-				debugLevel = Integer.parseInt(args[3]);
+			if (args.length > 4) {
+				debugLevel = Integer.parseInt(args[4]);
 			}
 		} catch (IndexOutOfBoundsException e) {
 
 			System.err
-					.println("Improper command format: GeneBankCreateBTree <debree> <gbk file> <sequence length> [<debug level>]");
+					.println("Improper command format: GeneBankCreateBTree <debree> <gbk file> <sequence length> <cache size> [<debug level>]");
 			System.exit(1);
 		}
 
@@ -51,7 +52,7 @@ public class GeneBankCreateBTree {
 		try {
 
 			// Create empty BTree
-			BTree<Sequence> btree = new BTree<Sequence>(degree,args[1],sequenceLength,new Sequence.SequenceFactory());
+			BTree<Sequence> btree = new BTree<Sequence>(degree, args[1], sequenceLength, new Sequence.SequenceFactory(), cacheSize);
 
 			// Read gbkFile
 			FileInputStream fis = new FileInputStream(gbkFile);
