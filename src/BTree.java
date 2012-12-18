@@ -599,10 +599,10 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				if (!ci.hasKey(key) && ci.isFull()) {
 					this.splitChild(i);
 					if (key.compareTo(this.getKey(i).getKey()) > 0) {
-						ci = this.getChild(++i);
+						i++;
 					}
 				}
-				ci.insert(key);
+				this.getChild(i).insert(key);
 			}
 		}
 
