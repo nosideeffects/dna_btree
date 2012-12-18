@@ -111,7 +111,7 @@ public class GeneBankCreateBTree {
 
 			System.err
 					.println("GBK File not found. Please check your filename and make sure the GBK file is in the 'data' folder.");
-			if (debugLevel > 1) {
+			if (debugLevel >= 1) {
 
 				e.printStackTrace();
 			}
@@ -120,7 +120,7 @@ public class GeneBankCreateBTree {
 		} catch (IOException e) {
 
 			System.err.println("IO Exception");
-			if (debugLevel > 1) {
+			if (debugLevel >= 1) {
 
 				e.printStackTrace();
 			}

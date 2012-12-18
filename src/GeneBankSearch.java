@@ -8,7 +8,7 @@ public class GeneBankSearch {
 		BTree btree = null;
 		String bTreeFile = "", queryFile = "";
 		ArrayList<Sequence> queries = new ArrayList<Sequence>();
-		int debugLevel = 0, sequenceLength = 0, cacheSize = 0;
+		int debugLevel = -1, sequenceLength = 0, cacheSize = 0;
 		
 		// Get parameters
 		try {
@@ -37,7 +37,7 @@ public class GeneBankSearch {
 		} catch (FileNotFoundException e) {
 			
 			System.err.println("BTree file not found. Please check your filename and make sure the BTree file is in the 'data' folder.");
-			if (debugLevel > 0) {
+			if (debugLevel >= 0) {
 				
 				e.printStackTrace();
 			}
@@ -47,7 +47,7 @@ public class GeneBankSearch {
 
 			//@TODO Set a proper error message
 			System.err.println("IO Exception.");
-			if (debugLevel > 0) {
+			if (debugLevel >= 0) {
 				
 				e.printStackTrace();
 			}
@@ -85,7 +85,7 @@ public class GeneBankSearch {
 		} catch (FileNotFoundException e) {
 			
 			System.err.println("Query file not found. Please check your filename and the file's location.");
-			if (debugLevel > 0) {
+			if (debugLevel >= 0) {
 				
 				e.printStackTrace();
 			}
@@ -95,7 +95,7 @@ public class GeneBankSearch {
 			
 			//@TODO Set a proper error message
 			System.err.println("IO Exception");
-			if (debugLevel > 0) {
+			if (debugLevel >= 0) {
 				
 				e.printStackTrace();
 			}
