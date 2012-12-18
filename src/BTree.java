@@ -18,13 +18,15 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	private Factory<T> factory;
 	private FileChannel fc;
 	
-	private Cache<BTreeNode<T>> cache;
+	private Cache<BTreeNode> cache;
+	private boolean cached;
 
 	public BTree(int degree, String name, int sequenceLength, Factory<T> factory) throws IOException {
 
 		this.factory = factory;
 		this.degree = degree;
 		this.numNodes = 0;
+		this.cached = false;
 
 		if (degree < 0) {
 
@@ -60,11 +62,15 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	
 	public BTree(int degree, String name, int sequenceLength, Factory<T> factory, int cacheSize) throws IOException {
 		this(degree, name, sequenceLength, factory);
-		this.cache = new Cache<BTreeNode<T>>(cacheSize);
+		if (cacheSize > 1) {
+			this.cached = true;
+			this.cache = new Cache<BTreeNode>(cacheSize);
+		}
 	}
 
 	public BTree(String bTreeFile, Factory<T> factory) throws IOException {
 		this.factory = factory;
+		this.cached = false;
 		File file = new File(bTreeFile);
 		this.fc = (new RandomAccessFile(file, "rw")).getChannel();
 		
@@ -78,15 +84,17 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		this.numNodes = bb.getInt();
 		
 		this.nodeSize = getNodeByteLength();
-		this.root = new BTreeNode<T>(rootOffset);
-		root.load();
+		this.root = loadNode(rootOffset);
 	}
 
 	public BTree(String bTreeFile, Factory<T> factory, int cacheSize) throws IOException {
 		this(bTreeFile, factory);
 		
-		this.cache = new Cache<BTreeNode<T>>(cacheSize);
-		this.cache.addObject(root);
+		if (cacheSize > 1) {
+			this.cached = true;
+			this.cache = new Cache<BTreeNode>(cacheSize);
+			this.cache.addObject(root);
+		}
 	}
 	
 	private int getNodeByteLength(){
@@ -171,7 +179,27 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		}
 	}
 	
-	public long getNewOffset(){
+	private BTreeNode<T> loadNode(Long k) throws IOException {
+		BTreeNode<T> node = null;
+		
+		if (cached) {
+			node = cache.getByKey(k);
+			
+			if (node == null) {
+				node = new BTreeNode<T>(k);
+				node.load();
+				
+				cache.addObject(node);
+			}
+		} else {
+			node = new BTreeNode<T>(k);
+			node.load();
+		}
+		
+		return node;
+	}
+	
+	private long getNewOffset(){
 		return 16 + nodeSize*numNodes;
 	}
 	
@@ -196,10 +224,9 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	}
 
 	@SuppressWarnings("hiding")
-	private class BTreeNode<T extends Comparable<T> & Serializable> {
-		private boolean loaded;
+	private class BTreeNode<T extends Comparable<T> & Serializable> implements Key {
 		private boolean leaf;
-		private long key = 0L;
+		private Long key = 0L;
 		/**
 		 * Number of keys.
 		 */
@@ -212,15 +239,17 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			numNodes += 1;
 			
 			this.leaf = true;
-			this.loaded = true;
 			this.n = 0;
 
 			this.keys = new Object[degree * 2 - 1];
 			this.children = new Object[degree * 2];
+			
+			if (cached) {
+				cache.addObject(this);
+			}
 		}
 
 		public BTreeNode(long k) throws IOException {
-			this.loaded = false;
 			this.key = k;
 			
 			this.keys = null;
@@ -240,29 +269,33 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 				// If there are more children to search
 			} else if (!this.isLeaf()) {
-				
-				
-				this.getChild(i + 1).load();
-				
 				return this.getChild(i + 1).search(key);
 			}
 			return null;
 		}
 
 		public void setChild(int index, BTreeNode<T> node) {
-			children[index] = node;
+			children[index] = node.key();
 		}
 
 		@SuppressWarnings("unchecked")
-		public BTreeNode<T> getChild(int index) {
-			return (BTreeNode<T>) children[index];
+		public BTreeNode<T> getChild(int index) throws IOException {
+			return (BTreeNode<T>) loadNode((Long) children[index]);
+		}
+		
+		public Long getChildKey(int index) {
+			return (Long) children[index];
+		}
+		
+		public void setChildKey(int index, Long k) {
+			children[index] = k;
 		}
 
 		@SuppressWarnings("unchecked")
-		public BTreeNode<T> removeChild(int index) {
-			BTreeNode<T> c = (BTreeNode<T>) children[index];
+		public Long removeChildKey(int index) {
+			Long k = (Long) children[index];
 			children[index] = null;
-			return c;
+			return k;
 		}
 
 		public void splitChild(int index) throws IOException {
@@ -278,14 +311,14 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 			if (!y.isLeaf()) {
 				for (int j = 0; j <= degree - 1; j++) {
-					z.setChild(j, y.removeChild(j + degree));
+					z.setChildKey(j, y.removeChildKey(j + degree));
 				}
 			}
 
 			y.n(degree - 1);
 
 			for (int j = this.n; j >= index + 1; j--) {
-				this.setChild(j + 1, this.removeChild(j));
+				this.setChildKey(j + 1, this.removeChildKey(j));
 			}
 			this.setChild(index + 1, z);
 
@@ -370,14 +403,14 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				i++;
 				
 				
-				//this.getChild(i).load();
-				if (!this.getChild(i).hasKey(key) && this.getChild(i).isFull()) {
+				BTreeNode<T> ci = this.getChild(i);
+				if (!ci.hasKey(key) && ci.isFull()) {
 					this.splitChild(i);
 					if (key.compareTo(this.getKey(i).getKey()) > 0) {
-						i++;
+						ci = this.getChild(++i);
 					}
 				}
-				this.getChild(i).insert(key);
+				ci.insert(key);
 			}
 		}
 
@@ -386,44 +419,31 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		 * @throws IOException 
 		 */
 		private void load() throws IOException {
-			if (!this.loaded) {
-				this.keys = new Object[degree*2 - 1];
-				this.children = new Object[degree*2];
-				
-				ByteBuffer bb = ByteBuffer.allocate(nodeSize);
-				bb.clear();
-				fc.read(bb, this.key);
-				bb.flip();
-				
-				this.key = bb.getLong();
-				this.n = bb.getInt();
-				// Get Node leaf value
-				this.leaf = (bb.get()==0)?false:true;
-	
-				// Get each node
-				for (int i = 0; i < this.n; i++){
-					TreeObject<T> t_obj = new TreeObject<T>();
-					t_obj.readObject(bb);
-					setKey(i,t_obj);
-				}
-				
-				// Get each child
-				if (!this.leaf) {
-					for (int i = 0; i < this.n + 1; i++) {
-						this.children[i] = new BTreeNode<T>(bb.getLong()); 
-					}
-				}
-				
-				this.loaded = true;
+			this.keys = new Object[degree*2 - 1];
+			this.children = new Object[degree*2];
+			
+			ByteBuffer bb = ByteBuffer.allocate(nodeSize);
+			bb.clear();
+			fc.read(bb, this.key);
+			bb.flip();
+			
+			this.key = bb.getLong();
+			this.n = bb.getInt();
+			// Get Node leaf value
+			this.leaf = (bb.get()==0)?false:true;
+
+			// Get each node
+			for (int i = 0; i < this.n; i++){
+				TreeObject<T> t_obj = new TreeObject<T>();
+				t_obj.readObject(bb);
+				setKey(i,t_obj);
 			}
-		}
-		
-		private void unload() {
-			if (this.loaded) {
-				this.keys = null;
-				this.children = null;
-				
-				this.loaded = false;
+			
+			// Get each child
+			if (!this.leaf) {
+				for (int i = 0; i < this.n + 1; i++) {
+					this.children[i] = bb.getLong(); 
+				}
 			}
 		}
 
@@ -451,7 +471,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			// Write each child
 			if (!this.leaf) {
 				for (int i = 0; i < this.n + 1; i++) {
-					bb.putLong(getChild(i).key);
+					bb.putLong((Long) children[i]);
 				}
 			}
 			bb.flip();
@@ -501,6 +521,11 @@ public class BTree<T extends Comparable<T> & Serializable> {
 			sb.delete(l - 2, l);
 			sb.append("]");
 			return sb.toString();
+		}
+
+		@Override
+		public Long key() {
+			return this.key;
 		}
 
 	}

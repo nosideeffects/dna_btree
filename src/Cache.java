@@ -2,21 +2,16 @@ import java.util.Iterator;
 import java.util.LinkedList;
 
 /**
- * Generic Cache for storing a specified number of T objects and recording
- * the number of cache references and hits.
+ * Cache designed for storing objects by key.
  * @author Jacob Biggs
  *
- * @param <T> type
  */
-public class Cache<T> {
+public class Cache<E extends Key> {
 	
 	private int maxSize;
 	private int size;
 	
-	private int cacheHit;
-	private int cacheRef;
-	
-	private LinkedList<T> list;
+	private LinkedList<E> list;
 	
 	/**
 	 * Creates a cache with a specified number of elements.
@@ -26,30 +21,21 @@ public class Cache<T> {
 		this.size = 0;
 		this.maxSize = maxSize;
 		
-		this.cacheHit = 0;
-		this.cacheRef = 0;
-		
-		this.list = new LinkedList<T>();
+		this.list = new LinkedList<E>();
 	}
 	
-	/**
-	 * Gets an object from the cache if it exists and moves it to the front of
-	 * the cache. Returns null otherwise.
-	 * @param obj - object to get
-	 * @return obj or null
-	 */
-	public T getObject(T obj){
-		cacheRef++;
-		
-		if( list.contains(obj) ){
-			cacheHit++;
-			list.remove(obj);
-			list.addFirst(obj);
-			return obj;
-		} else {
-			addObject(obj);
+	public E getByKey(Long key) {
+		E r_obj = null;
+		int i = 0;
+		for (E obj : list) {
+			if (obj.key().equals(key)) {
+				r_obj = list.remove(i);
+				list.addFirst(r_obj);
+				break;
+			}
+			i++;
 		}
-		return null;
+		return r_obj;
 	}
 	
 	/**
@@ -57,13 +43,14 @@ public class Cache<T> {
 	 * if cache is full.
 	 * @param obj - object to add
 	 */
-	public void addObject(T obj){
+	public void addObject(E obj){
 		list.addFirst(obj);
-		
-		if (size == maxSize)
+	
+		if (size == maxSize) {
 			list.removeLast();
-		else
+		} else {
 			size++;
+		}
 	}
 	
 	/**
@@ -71,7 +58,7 @@ public class Cache<T> {
 	 * @param obj - object to remove
 	 * @return true if removed, false otherwise
 	 */
-	public boolean removeObject(T obj){
+	public boolean removeObject(E obj){
 		boolean removed = list.remove(obj);
 		if (removed) this.size--;
 		return removed;
@@ -83,29 +70,11 @@ public class Cache<T> {
 	public void clearCache(){
 		list.clear();
 		size = 0;
-		
-		cacheHit = 0;
-		cacheRef = 0;
-	}
-	
-	/**
-	 * Returns number of times this cache was referenced looking for an object.
-	 * @return number of references
-	 */
-	public int getReferenceCount(){
-		return this.cacheRef;
-	}
-	
-	/**
-	 * Returns number of times a cache lookup was successful (getObject).
-	 * @return number of hits
-	 */
-	public int getHitCount(){
-		return this.cacheHit;
 	}
 
-	
-	public Iterator<T> iterator() {
+	public Iterator<E> iterator() {
 		return this.list.iterator();
 	}
+	
+	
 }
