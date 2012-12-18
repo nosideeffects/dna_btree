@@ -1,3 +1,8 @@
+Group:
+Jacob Biggs
+Michael Hance
+Robert Pooley
+
 Java BTree designed to store DNA sequences.
 
 Optimal Degree:
@@ -35,8 +40,10 @@ CREATE
 ------------------------
   T  k   cache   time
 ------------------------
+ 97  7      0    34.355s
  97  7    100    20.064s
  97  7    500    19.504s
+  2  7      0    33.280s
   2  7    100    25.305s
   2  7    500    33.125s
 ------------------------
