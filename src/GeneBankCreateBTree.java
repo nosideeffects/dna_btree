@@ -1,7 +1,9 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -96,7 +98,14 @@ public class GeneBankCreateBTree {
 			}
 
 			fis.close();
-			System.out.println(btree.inorderBuild());
+
+			if (debugLevel == 1) {
+				FileWriter fw = new FileWriter("dump");
+				BufferedWriter bw = new BufferedWriter(fw);
+				bw.write(btree.inorderBuild());
+				bw.close();
+			}
+			
 			btree.closeFile();
 		} catch (FileNotFoundException e) {
 
