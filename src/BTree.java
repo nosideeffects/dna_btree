@@ -18,7 +18,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	private Factory<T> factory;
 	private FileChannel fc;
 	
-	private Cache cache;
+	private Cache<BTreeNode<T>> cache;
 
 	public BTree(int degree, String name, int sequenceLength, Factory<T> factory) throws IOException {
 
@@ -78,7 +78,7 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		this.numNodes = bb.getInt();
 		
 		this.nodeSize = getNodeByteLength();
-		this.root = new BTreeNode(rootOffset);
+		this.root = new BTreeNode<T>(rootOffset);
 		root.load();
 	}
 
@@ -95,22 +95,6 @@ public class BTree<T extends Comparable<T> & Serializable> {
 	}
 
 	public void insert(T key) throws IOException {
-		if (this.cache != null) {
-			Iterator cacheIterator = this.cache.iterator();
-			while (cacheIterator.hasNext()) {
-				BTreeNode<T> obj = (BTreeNode<T>) cacheIterator.next();
-				if (obj.hasKey(key)) {
-					for (Object k: obj.getKeys()) {
-						if (((TreeObject<T>) k).getKey().compareTo(key) == 0) {
-							((TreeObject<T>) k).incrementFrequency();
-							obj.save();
-							return;
-						}
-					}
-				}
-			}
-		}
-		
 		BTreeNode<T> r = root;
 		if (r.isFull()) {
 			BTreeNode<T> s = new BTreeNode<T>();
@@ -256,18 +240,9 @@ public class BTree<T extends Comparable<T> & Serializable> {
 
 				// If there are more children to search
 			} else if (!this.isLeaf()) {
-				if (cache != null) {
-					BTreeNode<T> cacheObject = (BTreeNode<T>) cache.getObject(this.getChild(i + 1));
-					if (cacheObject != null) {
-						return cacheObject.search(key);
-					}
-				}
+				
 				
 				this.getChild(i + 1).load();
-				
-				if (cache != null) {
-					cache.addObject(this.getChild(i + 1));
-				}
 				
 				return this.getChild(i + 1).search(key);
 			}
@@ -381,9 +356,6 @@ public class BTree<T extends Comparable<T> & Serializable> {
 				}
 				
 				this.save();
-				if (cache != null) {
-					cache.addObject(this);
-				}
 			} else {
 				while (i >= 0 && key.compareTo(this.getKey(i).getKey()) < 0) {
 					i--;
