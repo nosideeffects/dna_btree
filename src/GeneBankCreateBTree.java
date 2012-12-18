@@ -96,7 +96,7 @@ public class GeneBankCreateBTree {
 			}
 
 			fis.close();
-			System.out.println(btree.toString());
+			System.out.println(btree.inorderBuild());
 			btree.closeFile();
 		} catch (FileNotFoundException e) {
 

@@ -141,6 +141,34 @@ public class BTree<T extends Comparable<T> & Serializable> {
 		build(sb, root, 0, "head", 0, true);
 		return sb.toString();
 	}
+	
+	public String inorderBuild() throws IOException {
+		StringBuffer sb = new StringBuffer();
+		inorderBuild(sb, root);
+		return sb.toString();
+	}
+	
+	private void inorderBuild(StringBuffer sb, BTreeNode<T> node) throws IOException {
+		if(node.isLeaf()) {
+			for (int i = 0; i < node.n; i++) {
+				TreeObject<T> key = node.getKey(i);
+				sb.append(key.frequency());
+				sb.append(' ');
+				sb.append(key.getKey().toString());
+				sb.append('\n');
+			}
+		} else {
+			for(int i = 0; i < node.n; i++){
+				inorderBuild(sb, node.getChild(i));
+				TreeObject<T> key = node.getKey(i);
+				sb.append(key.frequency());
+				sb.append(' ');
+				sb.append(key.getKey().toString());
+				sb.append('\n');
+			}
+			inorderBuild(sb, node.getChild(node.n));
+		}
+	}
 
 	@SuppressWarnings("unchecked")
 	private void build(StringBuilder sb, BTreeNode<T> node, int height,
