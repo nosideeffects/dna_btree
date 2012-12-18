@@ -8,17 +8,9 @@ public class SequenceTest {
 	 */
 	public static void main(String[] args) {
 		
-		String str = "test3.gbk.btree.data.7.97";
+		String str = "AATGATA";
 		
-		try {
-			BTree<Sequence> btree = new BTree<Sequence>(str ,new Sequence.SequenceFactory());
-			
-			System.out.println(btree.toString());
-			btree.closeFile();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		System.out.println(str.substring(str.length() - 7));
 		
 	}
 

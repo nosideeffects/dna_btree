@@ -92,7 +92,7 @@ public class GeneBankCreateBTree {
 					btree.insert(s);
 				}
 
-				extra = line.substring(line.length() - sequenceLength);
+				extra = line.substring(line.length() - sequenceLength + 1);
 			}
 
 			fis.close();
